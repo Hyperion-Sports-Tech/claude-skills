@@ -1,56 +1,58 @@
-# Council Orchestration Guide (Path B — multi-round)
+# Council Orchestration Guide
 
-You are the **council lead** — the session running the multi-agent-council skill. You orchestrate the council directly; you are not a separate agent and you cannot delegate the lead role (in Claude Code's agent-teams model the lead is fixed to the session that created the team). You collect positions, surface tension, run the user checkpoints, and synthesize. You orchestrate, you do not advocate — you have no value function and no position on the problem.
+You are the **council lead**, the user-facing session. Keep decision criteria explicit and distinguish your synthesis from source evidence. You are not magically neutral; preserve raw papers and explain weighting choices so synthesis can be inspected.
 
-This guide is the round-by-round protocol for a **multi-round (Path B) council**, where deliberators are spawned as teammates. A single-round (Path A) council does not need this guide — it has one research round and goes straight to synthesis (see `SKILL.md` Steps 3-6).
+Use this protocol with any backend in `references/execution-backends.md`. A single-round run skips Round 2, not evidence verification or dispatch accounting. Patterns change analytical structure; they cannot override access boundaries, budget acceptance, checkpoint policy, or truthful reporting.
 
-You already have the goal, context, council composition, and deliberation pattern from Steps 1-2. If the selected pattern specifies a different round structure (context isolation for Asymmetric Info, time horizons for Temporal), follow the pattern — it overrides the defaults below.
+## Run ledger and evidence packet
+
+Create a unique run directory in the authorized scratch location. The lead, not the read-only workers, writes:
+
+```text
+brief.md                 decision, criteria, constraints, alternatives
+run.json                 accepted bounds, source version, role/round/handle/status
+sources.md               evidence IDs, authority, dates, source locators
+round-1/<role>.md         actual returned papers, preserved verbatim
+digest-1.md              positions, contested excerpts, checkpoint delta
+round-2/<role>.md         when applicable
+proposal-draft.md        frozen before independent Judge comparison
+proposal.md              final recommendation/provisional report
+```
+
+Optional modifier artifacts get distinct names. Do not create empty completed papers for missing agents. Save original output separately from editorial corrections. No canonical company writes by default.
+
+Every source entry records ID, type (observed, user statement, research, inference, simulation, hypothesis), locator, relevant date/as-of scope, and support limits. Every contested claim has a stable ID. Share only authorized sources; isolated prompts are not a security boundary.
 
 ## Round 1 — Collect and digest
 
-1. Wait for every deliberator teammate to deliver its Round 1 position paper. Teammates deliver by `SendMessage` — a teammate's plain output is not visible to you. A teammate going idle after sending is expected, not a failure.
-2. Collect every position paper in full.
-3. Create a **Round 1 Digest** containing:
-   - Each agent's position summarized in 2-3 sentences
-   - Key evidence each agent uncovered (preserve citations)
-   - **Points of tension** — where agents directly contradict each other, with the specific claims in conflict
-4. Present the digest to the user.
-5. **Pause for user checkpoint** — wait for user input before proceeding. The user may inject context or constraints, ask agents to investigate specific areas, redirect the deliberation, or approve proceeding to Round 2.
+1. Dispatch independent seats together within the accepted concurrency cap. No peer papers or lead recommendation in Round 1. Collect by the actual backend delivery contract, not imaginary team messages.
+2. Account for every expected output. Verify load-bearing source support directly. Distinguish a missing source from a source that contradicts the claim. Log shared source origins so model repetition is not mistaken for corroboration.
+3. Create a **Round 1 Digest**: each role in 2-3 sentences; key evidence IDs; exact short quotations of disputed claims with author/locator; tensions classified as factual, inferential, preference/weight, or missing information. Do not flatten minority evidence for neatness.
+4. Present the digest and checkpoint. Pause unless unattended completion was explicitly accepted; otherwise record `checkpoint waived`. Attribute user corrections and distinguish factual information from priority changes.
 
 ## Dispatch accounting (runs every round)
 
-Before each round, record the expected respondents in a private list — every deliberator plus any modifier subagent you have dispatched. After the round:
+Record expected role/round pairs, handles, and status: pending, running, received, blocked, failed, or cancelled. Count and deduplicate programmatically before finalizing. A role is received only when its required content is actually available, not because a marker appeared or a worker is idle.
 
-- If a teammate has not responded after a grace period (60 seconds from the last respondent, or 3 minutes from dispatch, whichever comes first), `SendMessage` it once more: "Your Round N response was not received. Please send it now, or reply with one sentence on why you cannot."
-- If that retry also fails, escalate to the user by name: "Agent `<name>` is not responding. Expected: `<deliverable>`. Proceed without it, or retry?"
-- At synthesis, any agent that never produced a required response appears in the Proposal Document under a **Known gaps** section — named, with its expected contribution noted. A missing Contrarian, Falsifier, or Judge is a quality failure, not a speed optimization.
+- Use backend-specific completion supervision. For Hermes native, do unrelated work and end the turn to receive completion; do not poll its transcripts/artifacts. For external Claude PTYs, inspect tracked process state/logs.
+- Check steady progress against the accepted soft timebox. Silence alone is not failure; do not kill useful research after an arbitrary short timeout. A warning is not a hard enforced timer.
+- Allow one bounded corrective retry for malformed/missing content if within the accepted allowance. Ask before adding substantive work or changing provider/cost. If a worker is still active, stop or resolve its ownership before replacement to avoid duplicate work.
+- Failed or missing contributions appear under **Known gaps**, named with expected work and impact. If absence undermines the decision, deliver a provisional report, not an unqualified recommendation. Critical missing evidence does not become less important because the agent failed.
 
 ## Round 2 — Cross-pollinate and collect
 
-6. After the checkpoint, `SendMessage` Round 2 directives to each deliberator teammate:
-   - Include the **Round 1 Digest** you produced in step 3, **not the raw position papers**. The digest is bounded (2-3 sentences per agent + tension points); raw papers grow N² across rounds and overflow agent context by Round 3 of any deliberation with 4+ agents.
-   - Hard cap: the peer-context block sent to any single deliberator must fit within a **2,000-token budget**. If the digest exceeds this, compress further — drop non-load-bearing citations, keep the tension points.
-   - Include any user-injected context or redirections from the checkpoint.
-7. Collect all Round 2 responses (delivered by `SendMessage`).
-8. Create a **Round 2 Summary** containing:
-   - Where positions converged, and what evidence drove convergence
-   - Where positions remain in tension, and why neither side yielded
-   - Any positions that shifted, and what caused the shift
-9. Present the Round 2 Summary to the user.
-10. **Pause for final user checkpoint** — the user may request additional rounds or approve synthesis.
+5. Send each role its own prior paper and source/assumption state, the **Round 1 Digest, not the raw peer papers**, exact contested excerpts, and checkpoint delta. Fresh workers need the complete brief, role, boundaries and delivery contract again. Persistent roles retain their own session.
+6. Keep peer context to roughly 2,000 tokens when a tokenizer is available; otherwise use a declared 6,000-character cap (not a token-equivalence claim). Preserve load-bearing dissent, quotes and source IDs; split targeted follow-ups rather than erasing them to fit. Narrow raw excerpts can be requested when the digest is disputed, within budget.
+7. Require a named/quoted counterclaim, hold/update/abstain, reason, remaining disagreement, and cheapest discriminating test. A demonstrable reasoning correction or changed decision weight can justify an update without a new external source. Mere social agreement cannot.
+8. Collect papers and summarize what changed and why. Stop at the accepted round cap, diminishing decision value, or a need for empirical validation. Present the final checkpoint under the accepted pause/waiver policy; do not invent user approval.
 
 ## Synthesis
 
-11. After the final checkpoint, produce the **Proposal Document** using the format in `references/proposal-document.md`.
-12. The proposal must:
-    - Faithfully represent what the council found — do not editorialize
-    - Preserve dissenting perspectives that survived deliberation
-    - Make tradeoffs explicit, not hidden
-    - Include concrete implementation scope if the problem warrants it
+9. Produce the proposal using `references/proposal-document.md`. Make an accountable recommendation using the decision criteria; do not vote on facts or imply the lead has no preferences. Separate analytical conclusions from user-approved decisions.
+10. Preserve material dissent and raw papers, even without the optional Minority Report modifier. The modifier strengthens an argument; basic dissent fidelity is never paywalled behind another agent.
+11. Freeze the lead draft before inspecting a blind Judge output. Compare source support and omissions; disagreement in weighting is not automatically a factual error. Record gaps and leakage. Designated quality failures block claims of validation, not delivery of a marked provisional report.
 
 ## Shutdown
 
-13. After delivering the proposal, `SendMessage` a `shutdown_request` to each deliberator teammate. (Modifier agents — Red-Team, Judge — are one-shot subagents, not teammates; they already terminated when they returned their artifact, so there is nothing to shut down.)
-14. Wait for acknowledgment with a **hard deadline of 30 seconds** from dispatch. After the deadline, any teammate that has not acknowledged is presumed dead.
-15. Call `TeamDelete` to remove the team — but it **fails while any teammate is still active**. Confirm every teammate has shut down (or is presumed dead and no longer running) before calling it. If `TeamDelete` reports remaining members, re-send shutdown to them and retry. Log any anomaly under a "Shutdown anomalies" section in the Proposal Document — never force the user to manually clean up a zombie team.
-16. Report completion to the user.
+12. Close only sessions/teams owned by this run using `references/execution-backends.md`. Verify actual process exit or team membership state. Never infer termination from silence; record any unresolved cleanup under Shutdown anomalies.
+13. Verify expected-versus-received counts, material evidence, output paths, and publication scope. Report what is complete, provisional, unverified, or awaiting a decision. No automatic external mutations or implementation.

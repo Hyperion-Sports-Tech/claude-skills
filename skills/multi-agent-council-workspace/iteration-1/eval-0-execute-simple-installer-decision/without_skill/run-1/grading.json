@@ -1,0 +1,129 @@
+{
+  "expectations": [
+    {
+      "text": "proposal.md exists and contains all 7 required Proposal Document sections: Problem/Goal, Exploration, Recommended approach, Tradeoffs documented, Dissenting perspectives preserved, Implementation scope, Review triggers",
+      "passed": false,
+      "evidence": "proposal.md exists (24987 chars, outputs/proposal.md) with a bespoke 9-section structure instead of the template's 7. Mapping by concept: Exploration -> '## 2. What the council established (evidence)' + '## 3. Options, reframed as jobs' (present, though organized as chair-synthesized facts E1-E13 rather than one subsection per deliberator as references/proposal-document.md specifies). Recommended approach -> '## 1. Recommendation (TL;DR)' + '## 4. Decision Q1' + '## 5. Decision Q2' (strong). Tradeoffs documented -> present but not as its own section: an explicit 'Trade-off accepted:' paragraph in Section 5 and a 'What you give up:' bullet in Section 4, plus the Section 8 guardrails/failure-mode table. Dissenting perspectives preserved -> '## 6. Where the deliberators disagreed, and how it was resolved' (strong, table of Pragmatist/Strategist/Control-Risk positions with 'Dissent recorded' note). Implementation scope -> '## 7. Implementation plan' (strong, phased with time estimates). Review triggers -> '## 9. Triggers to revisit this decision' (heading matches template verbatim). MISSING: Problem/Goal has no dedicated section anywhere in the document. The only problem framing is a single header-table row ('Decision requested | (Q1) ... (Q2) ...') with no stated context/stakes/why-this-matters ('What we explored and why' per the template) \u2014 the document opens straight into the recommendation. facts.json's automated sections_present detector found zero literal matches for any of the 7 template headings in any output file, consistent with manual review: 6/7 concepts have identifiable dedicated content, but Problem/Goal does not, so not all 7 required sections are present."
+    },
+    {
+      "text": "At least 2 position papers exist in round-1/, each <=450 words, each with >=2 concrete citations (a file path or a URL)",
+      "passed": false,
+      "evidence": "3 papers exist in outputs/round-1/ (control-risk-advocate.md, ecosystem-strategist.md, maintainer-pragmatist.md). Per facts.json (independently confirmed with `wc -w`/`wc -l`): control-risk-advocate.md = 1634 words (80 lines), ecosystem-strategist.md = 1565 words (78 lines), maintainer-pragmatist.md = 1280 words (52 lines). All three exceed the 450-word cap by roughly 3-4x; zero papers satisfy the word limit, so 'at least 2 papers <=450 words' cannot be met regardless of citation counts. Citations were otherwise strong (path_citations 4/8/5 and url_citations 0/1/0 respectively, all >=2 total), but the word-cap clause fails universally."
+    },
+    {
+      "text": "Roles used come from the role library and at least one pair is listed as 'natural tension' in roles-index.md",
+      "passed": false,
+      "evidence": "Roles used: 'maintainer-pragmatist', 'ecosystem-strategist', 'control-risk-advocate' (transcript Steps 31-33 Agent calls; filenames in outputs/round-1/). None of these names appear in /Users/tomasdussaillant/repos/skills/skills/multi-agent-council/references/roles-index.md, whose 15 defined roles are Pragmatist, Visionary, Domain Expert, Archaeologist, Minimalist, Analogist, First Principles, Falsifier, Stress Tester, Contrarian, Economist, Regulator, Anthropologist, Ethicist, Integrator. These are ad hoc, task-specific role names invented in the fork-agent prompts, not drawn from the library (per task instructions, ad hoc roles do not satisfy this expectation regardless of thematic resemblance). Consistent with this being the 'without_skill' arm: the transcript contains no Skill-tool invocation of multi-agent-council and no read of roles-index.md; the executor's own closing summary (Step 46) states 'Treated \"council this\" as a lightweight three-perspective deliberation run without the multi-agent-council skill (this is the without_skill arm)'."
+    },
+    {
+      "text": "Recommended approach commits to one concrete direction (not 'it depends') and the Tradeoffs section names what gets worse under it",
+      "passed": true,
+      "evidence": "proposal.md Section 1 gives an unhedged, numbered decision: 'Stop investing in skills.sh as an installer... Adopt the standard flow for everything that leaves the dev machine... Add a one-file Claude Code marketplace... keep the monorepo... version numbers... implicit by default.' Sections 4 and 5 each open with an explicit 'Decision:' line. Downsides of that direction are explicitly named, not hand-waved: Section 5 states 'Trade-off accepted: with SHA-derived versions and source: \"./\", every commit re-versions every plugin and each plugin copy is the whole repo, so auto-updating installs re-copy on unrelated commits'; Section 4 states 'What you give up: control over conventions you were not exercising (no versions, no tags exist today), and acceptance of two third-party roadmaps.' Section 8's guardrails table adds further concrete costs (e.g., cache churn, no rollback on npx updates)."
+    },
+    {
+      "text": "Every review trigger is falsifiable: contains a measurable threshold, count, or date",
+      "passed": false,
+      "evidence": "Section 9 'Triggers to revisit this decision' lists 5 triggers. Only one has a measurable threshold/count: 'The repo passes ~20 plugins or commits become daily -> explicit versions to stop cache churn.' The other four are qualitative/event-based with no threshold, count, or date: 'An external user... asks \"which version am I on?\"', 'A skill becomes a dependency of another plugin', 'Either ecosystem changes its discovery/layout conventions... re-evaluate then, not pre-emptively', and 'You want the Linear hooks on other machines.' These closely resemble the multi-agent-council skill's own documented bad-trigger pattern ('If things change significantly' / 'If the team feels it's not working' in references/proposal-document.md) rather than its good-trigger pattern (specific numeric thresholds). Since only 1 of 5 triggers is genuinely falsifiable by a measurable threshold/count/date, 'every review trigger' does not hold."
+    },
+    {
+      "text": "Position papers report their approximate budget consumed (tokens / tool calls) as the deliberator prompt requires",
+      "passed": false,
+      "evidence": "facts.json reports mentions_budget_consumed: false for all three round-1 papers; independently confirmed by reading each file in full -- none mentions token counts or tool-call counts anywhere. Each paper ends with 'Risks / open questions I concede' and 'One-line verdict' sections with no budget accounting. The ad hoc fork-agent prompts built for this run (transcript Steps 31-33) also show no visible budget-reporting instruction, and a full-text search of transcript.md for 'budget' returns zero hits -- unlike the real skill's references/deliberator-prompt.md, which explicitly instructs deliberators to 'Report actual budget consumed (approximate is fine -- \"~8k tokens, 12 tool calls\")'. Consistent with the without_skill arm: the requirement was never injected into the sub-agent prompts, so no paper satisfies it."
+    },
+    {
+      "text": "Deliberators were spawned in parallel (multiple Agent calls in one assistant message) and no nonexistent tools (TeamCreate/TeamDelete) were called",
+      "passed": false,
+      "evidence": "facts.json: agent_calls_per_message = [1, 1, 1], max_parallel_spawn = 1. Transcript confirms three separate 'Tool: Agent' steps (Step 31 at 15:45:57.955Z for maintainer-pragmatist, Step 32 at 15:46:17.541Z for ecosystem-strategist, Step 33 at 15:46:39.014Z for control-risk-advocate), each roughly 20 seconds apart in its own assistant turn rather than batched into a single message with multiple tool_use blocks -- i.e. sequential spawning, not parallel. The second clause does hold (facts.json nonexistent_team_tools_called: {} -- no TeamCreate/TeamDelete calls found), but because the expectation is a conjunction ('spawned in parallel ... AND no nonexistent tools'), the failed parallelism clause fails the expectation overall."
+    },
+    {
+      "text": "The run finished the proposal without stalling at a user checkpoint (user was absent)",
+      "passed": true,
+      "evidence": "User's task explicitly stated: 'I'm heading into meetings so don't block on me at checkpoints: proceed through the whole thing.' facts.json: ask_user_question_calls = 0, sendmessage_calls = 0. The run proceeded end-to-end: repo/ecosystem research (Steps 3-29), 3 parallel-role deliberators spawned and completed (Steps 31-41), chair synthesis (Step 42), proposal.md written via the Write tool (Step 43), and a final 'Run log' summary (Step 46) describing the completed approach and unanimous/dissenting outcomes. All required output files (outputs/proposal.md and all 3 outputs/round-1/*.md) exist with substantive content. No checkpoint stall occurred."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 6,
+    "total": 8,
+    "pass_rate": 0.25
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Bash": 30,
+      "ToolSearch": 1,
+      "WebFetch": 6,
+      "WebSearch": 1,
+      "Agent": 3,
+      "Write": 1
+    },
+    "total_tool_calls": 42,
+    "total_steps": 46,
+    "errors_encountered": 0,
+    "output_chars": 54706,
+    "transcript_chars": 60843
+  },
+  "claims": [
+    {
+      "claim": "npx skills add /Users/tomasdussaillant/repos/skills --list found 9 skills, including a vendored playwright-cli leak",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Transcript Step 26 tool result literally shows 'Found 9 skills' followed by an 'Available Skills' listing; proposal.md E2 attributes the 9th to '.claude/skills/playwright-cli/SKILL.md (tracked in git; vendored third-party)'."
+    },
+    {
+      "claim": "skills.sh is 470 lines and was touched in only 2 of the repo's 14 commits",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Transcript Step 28 tool result: 'skills.sh line count === 470 skills.sh' and 'commits touching skills.sh === 7cdef8e ... / 7efa0da ...' (2 entries) against 'total commits ... === 14'."
+    },
+    {
+      "claim": "docs/ holds approximately 5.6 MB of tracked research transcripts",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Grader independently ran `du -sh docs` in the repo and got '5.6M docs', matching proposal.md Section 1 point 5 and Appendix evidence E12 exactly."
+    },
+    {
+      "claim": "A draft .claude-plugin/marketplace.json for this repo passes `claude plugin validate --strict`",
+      "type": "process",
+      "verified": true,
+      "evidence": "Transcript Step 39 tool result: '=== validate --strict === ... Validating marketplace manifest ... Validation passed', following the scratchpad marketplace.json constructed in Step 39's command."
+    },
+    {
+      "claim": "The chair's 'Where the deliberators disagreed' synthesis table in proposal.md Section 6 accurately reflects each of the three papers' actual Q2 positions",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Cross-checked each cell against the source paper: Pragmatist column ('No -- SHA/hash until someone asks') matches maintainer-pragmatist.md ('Monorepo, no version numbers, no tags -- now'); Strategist column ('Yes -- metadata.version ... mirrored to marketplace, CI check') matches ecosystem-strategist.md's Q2 section; Control/Risk column ('Yes -- metadata.version maintainer-owned; mirror only if marketplace opened') matches control-risk-advocate.md's Q2 recommendation. No fabrication detected in the synthesis."
+    },
+    {
+      "claim": "Total effort for the proposed plan is roughly 2-3 hours, and every step is reversible",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Section 7's phase estimates (Phase 0 ~40 min + Phase 1 ~20 min + Phase 2 ~45 min + Phase 3 ~30 min) sum to ~135 minutes (~2h15m), consistent with the claimed 2-3 hour range; reversibility is asserted per-phase with concrete mechanisms ('old files stay in git history', 'delete it and nothing else depends on it') rather than a bare assertion."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": [],
+    "note": "outputs/user_notes.md does not exist for this run; no executor-flagged notes were available."
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "proposal.md exists and contains all 7 required Proposal Document sections...",
+        "reason": "This run has 6 of 7 concepts clearly present with strong, well-cited content (Dissenting perspectives, Implementation scope and Review triggers are exemplary and even reuse the template's exact heading names) and fails only because there is no dedicated Problem/Goal framing -- the decision is stated in a header-table row but context/stakes are never established as their own unit. The all-or-nothing phrasing means a near-miss on one section grades identically to a proposal missing most of the structure. Worth clarifying in the expectation (or splitting into a checklist) whether a metadata table restating the question is intended to satisfy 'Problem/Goal', since that boundary call determines the verdict here."
+      },
+      {
+        "assertion": "Position papers report their approximate budget consumed (tokens / tool calls) as the deliberator prompt requires",
+        "reason": "The phrase 'as the deliberator prompt requires' presumes the real multi-agent-council skill's references/deliberator-prompt.md template was in play, but this transcript is the without_skill baseline: the executor wrote its own ad hoc fork-agent prompts that never mention budget reporting at all (confirmed by a zero-hit grep for 'budget' across the transcript). The assertion still correctly fails here (no paper reports budget), but the wording could mislead a grader into hunting for a prompt requirement that doesn't exist in this arm. Consider rephrasing for the without_skill arm as 'the executor's own deliberator prompts require' or simply 'the position papers report approximate budget consumed', which is really what's being tested."
+      },
+      {
+        "reason": "No expectation credits or checks the genuinely strong empirical grounding in this run: the executor actually ran `npx skills add <repo> --list` (found a real leaked playwright-cli vendor skill), ran `claude plugin validate --strict` against a hand-built marketplace.json and got a real pass, and cross-referenced live local state (~/.agents/.skill-lock.json, an installed marketplace.json on disk) instead of relying on memory. Two of its cited numeric facts (470-line skills.sh, 5.6MB docs/) were independently re-verified by this grader and were exactly correct. An assertion rewarding verifiable-against-the-live-repo citations (and catching fabricated ones) would give credit for this and would meaningfully discriminate against a run that merely cites plausible-sounding facts."
+      },
+      {
+        "assertion": "Deliberators were spawned in parallel (multiple Agent calls in one assistant message) and no nonexistent tools (TeamCreate/TeamDelete) were called",
+        "reason": "The two clauses test different things and behave very differently here: the parallel-spawn clause is a genuine, meaningful failure (3 sequential Agent calls ~20s apart), while the 'no nonexistent tools' clause is close to a freebie in a without_skill baseline -- nothing in this agent's self-invented process ever suggested tools like TeamCreate/TeamDelete exist, so it was never at risk of calling them. Bundling both into one AND means the pass/fail signal is really carried by the parallelism half alone; splitting them would let each be tracked independently across runs (the TeamCreate/TeamDelete check is more likely to discriminate on the with_skill arm or on regressions)."
+      }
+    ],
+    "overall": "6 of 8 expectations failed, but not uniformly for the same reason: two (word budget, role-library discipline) reflect this baseline skipping constraints that only the actual skill's templates/prompts impose; two (parallel spawn, falsifiable triggers) reflect genuine process/quality gaps in this specific run; one (Problem/Goal section) is a close, arguable call on an otherwise strong document. The two passes (concrete recommendation with named tradeoffs, finishing unattended without stalling) are well-earned and non-trivial. The expectations are discriminating and mostly well-evidenced by the transcript and facts.json; the main improvements would be splitting the compound expectation 7, clarifying the without_skill wording of expectation 6, and considering a section-completeness or fact-verifiability metric with partial credit rather than all-or-nothing."
+  }
+}

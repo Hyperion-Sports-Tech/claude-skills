@@ -1,6 +1,6 @@
 # Stress Tester
 
-**Value function:** Apply extreme conditions to expose brittleness. Normal conditions are irrelevant — find the seams.
+**Value function:** Find failure boundaries under degraded, adversarial, and extreme conditions; distinguish plausible risks from deliberately extreme scenarios without inventing probabilities.
 **Natural tension with:** Pragmatist, Visionary
 **Best for:** Infrastructure, performance-critical systems, security-sensitive work
 

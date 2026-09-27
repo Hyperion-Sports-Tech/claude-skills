@@ -5,7 +5,9 @@
 
 ## What It Is
 
-Each agent holds a different slice of context and is restricted from accessing the others' information. Unlike the Council pattern where agents share context but differ in value functions, here agents share value functions but differ in information. The deliberation forces collaboration: no agent can solve the problem alone because each is missing critical pieces.
+Each agent receives a different authorized context slice. Unlike Council, diversity is primarily informational, not competing objectives. The result reveals assumptions created by missing information. Follow the shared orchestration guide and execution backend; do not claim that prompt omission enforces access isolation.
+
+For hard isolation, use curated inline packets with tools disabled or an actual filesystem/access boundary. Shared unrestricted tools can reveal other slices or drafts. If only prompt-level separation is possible, label it as such and record leakage; never treat this as a confidentiality control.
 
 ## When to Use
 
@@ -34,7 +36,7 @@ Each agent receives only its assigned context slice plus the shared goal. Agents
 3. Lists the questions it would need answered to have full confidence in its proposal
 
 **Lead responsibilities:**
-- Spawn the agents per `SKILL.md` Step 3 — this is a 2-round pattern, so Path B (teammates). The context boundary is enforced by what you put in each agent's spawn prompt: give each agent only its designated slice.
+- Dispatch a two-round run through the selected backend; give each worker only its assigned packet and shared goal. Fresh-worker state replay and persistent sessions are both supported.
 - Enforce isolation: do not leak context between agents during Round 1
 - Collect all Round 1 outputs
 - Create a digest highlighting where proposals conflict and where assumptions diverge
@@ -47,11 +49,11 @@ Present the Round 1 digest to the user. Highlight:
 - Where proposals are incompatible because of missing information
 - Gaps that none of the agents can fill (the user may need to provide additional context)
 
-The user can reveal additional context, correct false assumptions, or add a fourth context slice if needed.
+The user can reveal additional context, correct false assumptions, or approve another slice. Under an explicit unattended waiver, record missing user input and remain within the accepted sources and budget.
 
 ### Round 2 — Information Sharing (parallel)
 
-Context boundaries are lifted. Each agent receives all other agents' Round 1 positions and context via SendMessage. Each agent must:
+Analytical boundaries are lifted only for sources already authorized for sharing. Each agent receives its own paper and the peer digest with newly disclosed evidence excerpts through the selected backend. Privacy and access boundaries are never lifted merely because a round changes. Each agent must:
 
 1. Identify which of its Round 1 assumptions were wrong
 2. Identify what it now knows that changes its recommendation
@@ -59,7 +61,7 @@ Context boundaries are lifted. Each agent receives all other agents' Round 1 pos
 4. Produce a revised proposal that accounts for the full picture
 
 **Lead responsibilities:**
-- `SendMessage` all Round 1 positions and the originally-siloed context to every agent
+- Deliver a bounded digest plus necessary originally-siloed evidence excerpts; preserve source IDs and exact disputed claims, with targeted retrieval if needed
 - Include any additional context from the user checkpoint
 - Collect all Round 2 outputs
 

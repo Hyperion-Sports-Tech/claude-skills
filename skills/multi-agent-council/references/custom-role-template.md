@@ -4,9 +4,9 @@
 
 Create a custom role when:
 
-- The problem requires **domain-specific expertise** not covered by the 15 built-in roles (e.g., regulatory compliance, specific infrastructure platforms, industry-specific constraints)
+- The problem requires a perspective not covered by the role index (e.g., specific infrastructure platforms or industry-specific constraints)
 - The project has **local constraints** that need a dedicated advocate (e.g., a legacy system that must be preserved, a specific SLA commitment)
-- You need to **guarantee tension** on a dimension the built-in roles don't cover
+- You need to expose a decision-relevant tension the built-in roles do not cover
 
 Do not create a custom role when an existing role already covers the perspective — check the role catalog first.
 
@@ -16,8 +16,12 @@ Do not create a custom role when an existing role already covers the perspective
 name: [kebab-case-name]
 title: [Human-readable title]
 value_function: >
-  [A hard constraint that makes certain conclusions structurally impossible.
-   Must use language like "cannot propose", "must reject", "will not accept".]
+  [An explicit optimization objective, its tradeoffs, and what evidence could
+   change the recommendation. Do not prescribe the answer.]
+hard_constraints:
+  - [Only actual user constraints or verified obligations, with provenance]
+update_rule: >
+  [What observation, reasoning correction, or priority change would alter the recommendation]
 lens: >
   [What this agent examines. What questions it asks. What it looks for in code,
    architecture, and design.]
@@ -29,7 +33,7 @@ research_directives:
 
 ## Writing a good value function
 
-A value function is a **structural constraint**, not an opinion.
+A value function defines what the role prioritizes, not what it must believe. Separate it from sourced hard constraints. The examples below illustrate possible constraints only; they are not universally applicable security requirements or legal advice.
 
 | Bad (opinion)                          | Good (constraint)                                                        |
 | -------------------------------------- | ------------------------------------------------------------------------ |
@@ -37,7 +41,7 @@ A value function is a **structural constraint**, not an opinion.
 | "Consider performance"                | "Must reject approaches that cannot demonstrate sub-100ms p95 latency"   |
 | "Think about data privacy"            | "Will not accept architectures that allow PII to leave the trust boundary without encryption" |
 
-The test: if your value function allows the agent to say "good point, I agree" to everything, it is not a constraint.
+The test: can the role name a distinct question, cost it is willing to accept, and evidence that would change its conclusion? Agreement after independent examination is allowed.
 
 ## Example 1: Security Architect (auth system redesign)
 
@@ -54,7 +58,7 @@ lens: >
 research_directives:
   - Map all current auth flows and identify where credentials are validated
   - Check token expiration policies and scope definitions
-  - Search for shared secrets, hardcoded credentials, or overly broad IAM roles
+  - Review authorized auth design and scoped scan findings without reading or printing credential values
 ```
 
 ## Example 2: Data Privacy Officer (data pipeline decision)
@@ -78,4 +82,4 @@ research_directives:
 
 ## Ensuring tension with existing roles
 
-A custom role is only useful if it creates productive disagreement. Before adding one, verify that its value function will conflict with at least one existing council member. If the custom role agrees with everyone, it adds noise, not signal.
+A custom role is useful if it covers a missing decision criterion or evidence boundary. Identify likely tradeoffs with another seat, without requiring them to reach different conclusions. Do not duplicate a role just to increase headcount.

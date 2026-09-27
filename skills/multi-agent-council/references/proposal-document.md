@@ -2,6 +2,8 @@
 
 This is the final artifact of a council deliberation. The team lead produces this after all rounds and user checkpoints are complete.
 
+Use a concise decision brief with linked raw evidence, not a transcript dump. Checkpoints may be explicitly waived; record that instead of inventing approval. This template is not a wiki schema: before publishing, apply the destination's actual conventions. A report is a recommendation, not authorization to implement.
+
 ---
 
 ```markdown
@@ -9,6 +11,15 @@ This is the final artifact of a council deliberation. The team lead produces thi
 
 ## Problem / Goal
 [What we explored and why — 2-3 sentences establishing context and stakes]
+
+## Decision status and criteria
+[Proposed / provisional / user-approved; owner; as-of date; decision criteria
+and weights; constraints; reversibility; checkpoint approvals or waivers.
+Do not assume approval from completed analysis.]
+
+## Alternatives considered
+[Include status quo/do nothing, defer/test, and credible alternatives.
+Why each was retained or rejected, using criteria rather than vote counts.]
 
 ## Exploration
 
@@ -40,8 +51,31 @@ revisits. Include the key evidence that sustained each dissent.]
 
 ## Implementation scope
 [If applicable — what needs to be built, rough shape of the work, key
-components and boundaries. This section feeds directly into
-writing-plans-for-teams as the input for plan generation.]
+components and boundaries. For business/wiki work: proposed artifact changes,
+owners, dependencies, and non-goals. Discover any downstream skill before use;
+no automatic code changes, CRM writes, publishing, commits or deployments.]
+
+## Evidence and uncertainty
+[Claim IDs, primary-source locators and dates, inference/scenario labels,
+load-bearing assumptions, conflicting sources, confidence limits, and what
+would change the conclusion. Raw papers are provenance, not independent facts.]
+
+## Cheapest next test
+[Hypothesis; discriminating observation; threshold or decision rule; data
+collection method; proposed owner; cost/time assumptions; success/failure action.
+If no further test is warranted, explain why. Do not invent scheduled work.]
+
+## Known gaps and run accounting
+[Expected vs received roles/rounds/modifiers; failed/missing contributions and
+effect on confidence; actual backend/model, checkpoint state, observable usage
+or unavailable; raw output paths. Name unverified claims and unavailable audits.]
+
+## Publication and handoff
+[Canonical destination and provenance links; written vs proposed changes;
+approval still needed. Scratch output is not durable publication.]
+
+## Shutdown anomalies
+[Actual state of run-owned sessions; unresolved cleanup. Omit if none.]
 
 ## Review triggers
 [Specific, measurable conditions that should cause revisiting this proposal.

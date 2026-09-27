@@ -1,0 +1,353 @@
+{
+  "metadata": {
+    "skill_name": "multi-agent-council",
+    "skill_path": "<path/to/skill>",
+    "executor_model": "<model-name>",
+    "analyzer_model": "<model-name>",
+    "timestamp": "2026-08-15T16:06:25Z",
+    "evals_run": [
+      0,
+      1,
+      2
+    ],
+    "runs_per_configuration": 3
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.25,
+        "passed": 2,
+        "failed": 6,
+        "total": 8,
+        "time_seconds": 249.8,
+        "tokens": 75958,
+        "tool_calls": 15,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "proposal.md exists and contains all 7 required Proposal Document sections: Problem/Goal, Exploration, Recommended approach, Tradeoffs documented, Dissenting perspectives preserved, Implementation scope, Review triggers",
+          "passed": false,
+          "evidence": "outputs_dir contains only an empty outputs/round-1/ directory (0 files, verified with find). No proposal.md exists anywhere under outputs/. The transcript never reaches SKILL.md Step 6 (Synthesis) \u2014 it ends at Step 18 while still waiting on the 4 deliberator subagents it spawned in Steps 11-14. facts.json confirms outputs: {} and zero child_agent_notifications, so no digest or synthesis material was ever collected to write a proposal from."
+        },
+        {
+          "text": "At least 2 position papers exist in round-1/, each <=450 words, each with >=2 concrete citations (a file path or a URL)",
+          "passed": false,
+          "evidence": "outputs/round-1/ is empty (0 files, confirmed via `find ... -type f`). No position papers were written to the required location. Note: 4 well-formed position papers (390, 351, 398, 365 words; each with 5+ file:line/URL citations) do exist, but only in the sibling recovered-from-deliberator-transcripts/ folder, which the grading instructions explicitly say must NOT be counted for this expectation because the council lead never received or wrote them (0 SendMessage calls, 0 child_agent_notifications per facts.json)."
+        },
+        {
+          "text": "Roles used come from the role library and at least one pair is listed as 'natural tension' in roles-index.md",
+          "passed": true,
+          "evidence": "Transcript Step 6 shows the lead reading references/roles/{archaeologist,domain-expert,falsifier,economist,pragmatist,visionary}.md before composing the council. The 4 roles actually spawned (Steps 11-14: archaeologist, domain-expert, falsifier, economist) all appear as exact rows in references/roles-index.md, and the value-function text in each Agent prompt matches that index/role-file content verbatim or near-verbatim. roles-index.md's 'Natural Tension With' column lists Falsifier's tensions as 'Visionary, Domain Expert' and Economist's as 'Visionary, Domain Expert' \u2014 since Domain Expert is also in this council, both (Falsifier, Domain Expert) and (Economist, Domain Expert) are natural-tension pairs actually present in the roster."
+        },
+        {
+          "text": "Recommended approach commits to one concrete direction (not 'it depends') and the Tradeoffs section names what gets worse under it",
+          "passed": false,
+          "evidence": "No proposal.md was produced (see expectation 1), so no 'Recommended approach' or 'Tradeoffs documented' section exists to evaluate. The run never reached the synthesis step."
+        },
+        {
+          "text": "Every review trigger is falsifiable: contains a measurable threshold, count, or date",
+          "passed": false,
+          "evidence": "No proposal.md was produced, so no 'Review triggers' section exists. There is nothing to check for falsifiability."
+        },
+        {
+          "text": "Position papers report their approximate budget consumed (tokens / tool calls) as the deliberator prompt requires",
+          "passed": true,
+          "evidence": "references/deliberator-prompt.md requires: 'Report actual budget consumed (approximate is fine...) at the end of your position paper.' All 4 recovered papers comply: archaeologist.md ends '**Budget consumed:** ~9k tokens, 6 tool calls.'; domain-expert.md ends '**Budget consumed:** ~9k tokens, 6 tool calls.'; falsifier.md ends 'Budget consumed: ~9.5k tokens, 7 tool calls.'; economist.md ends '**Budget consumed:** ~9.5k tokens, 5 tool calls.' CAVEAT (per grading instructions): this PASS is based solely on recovered-from-deliberator-transcripts/, which the council lead never received (0 SendMessage calls, 0 notifications in facts.json) and which are explicitly excluded from counting toward expectations 1-2. This PASS reflects that the deliberator subagents individually complied with the prompt's budget-reporting requirement, not that the skill run delivered this as usable output."
+        },
+        {
+          "text": "Deliberators were spawned in parallel (multiple Agent calls in one assistant message) and no nonexistent tools (TeamCreate/TeamDelete) were called",
+          "passed": false,
+          "evidence": "facts.json: agent_calls_per_message: [1,1,1,1], max_parallel_spawn: 1 \u2014 every one of the 4 Agent calls (transcript Steps 11, 12, 13, 14, timestamped 15:41:08, 15:41:35, 15:42:01, 15:42:30) was issued alone in its own assistant message, never batched. This directly violates SKILL.md's explicit Path A instruction: 'Spawn all agents that share a round in a single message so they run concurrently' / 'one Agent call each, all in one message for a parallel Round 1.' The assistant's own Step 15 text ('All four deliberators are running in parallel') describes post-spawn execution state, not the spawning mechanism, and does not satisfy this expectation's specific 'multiple Agent calls in one assistant message' bar. The second clause does pass in isolation \u2014 facts.json nonexistent_team_tools_called: {} confirms no TeamCreate/TeamDelete were called, correctly matching Path A (no team_name) for a Simple-tier, single-round council \u2014 but since the expectation is a conjunction of both clauses, the overall verdict is FAIL."
+        },
+        {
+          "text": "The run finished the proposal without stalling at a user checkpoint (user was absent)",
+          "passed": false,
+          "evidence": "The run did not finish the proposal: outputs/ is empty and the transcript ends at Step 18 (assistant text, 15:42:58Z) with no proposal.md, no digest, no synthesis. facts.json shows sendmessage_calls: 0, child_agent_notifications: [], child_agent_tokens_sum: 0 \u2014 the lead never received any of the 4 position papers back from its subagents and never proceeded past 'waiting for their position papers to arrive.' It also called ToolSearch for the Monitor tool (Step 17) but never actually invoked Monitor before the transcript ends. Note on the parenthetical: the run did NOT fail via a literal user-checkpoint stall in the AskUserQuestion sense (ask_user_question_calls: 0, correctly honoring the user's 'don't block on me' instruction) \u2014 instead it deadlocked waiting on asynchronous child-agent results that never arrived within the run. Regardless of which stall mechanism applies, the primary required outcome ('finished the proposal') is false, so this expectation fails."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 729.8,
+        "tokens": 111361,
+        "tool_calls": 13,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "council-prompts.md exists and contains exactly 3 fully populated deliberator prompts (Moderate tier), each with role name, value function, lens, research directives, goal and context",
+          "passed": true,
+          "evidence": "outputs/council-prompts.md exists (67,305 bytes, 793 lines). Contains exactly 3 deliberator prompts: Pragmatist (line 113 'You are the **Pragmatist**...'), Stress Tester (line 259), Falsifier (line 405). Independent grep confirms exactly 3 occurrences each of '**Your value function:**', '## Your lens', '## Research directives', '## Problem', and '## Context' -- one full set per role, none missing or duplicated. Header table (line 7: '**Tier** | Moderate') and Gate 2 (line 35: 'Gate 2 -- tier (Moderate, as requested)') both state Moderate tier, and the per-agent research budget stated in all 3 prompts (line 201/347/493: '~20,000 tokens for this round') matches SKILL.md's own Moderate-tier table value ('Tool budget/agent: ~20k'). Directly diffed the value function / lens / research-directives text against references/roles/pragmatist.md, stress-tester.md, and falsifier.md -- byte-identical in all 3 cases, confirming the prompts are genuinely populated from the real role library, not paraphrased or fabricated."
+        },
+        {
+          "text": "No unfilled template placeholders remain (no [GOAL], [CONTEXT], [ROLE_NAME], [VALUE_FUNCTION], [ROLE_LENS], [RESEARCH_DIRECTIVES], [TOKEN_BUDGET], [MODE], [LEAD_NAME])",
+          "passed": true,
+          "evidence": "Independent grep for the exact token list `\\[(GOAL|CONTEXT|ROLE_NAME|VALUE_FUNCTION|ROLE_LENS|RESEARCH_DIRECTIVES|TOKEN_BUDGET|MODE|LEAD_NAME)\\]` against the output file returns zero matches. A broader scan for any bracketed ALL-CAPS token `\\[[A-Z_]{3,}\\]` also returns zero matches. facts.json independently confirms `\"placeholders_left\": []`. Note: the file does contain bracketed notes like '[LEAD: paste the \"Recommended approach\" ... sections of the Proposal Document, verbatim.]' (line 656) and '[LEAD: paste the same Codebase-facts block ...]' (line 660) inside the pre-mortem prompt -- these are not unfilled generation-time template tokens (none matches the forbidden list), they are intentional runtime-fill markers for content that cannot exist until after the human has actually run the council, structurally identical to the intentional '___' blanks in the Codebase-facts block (items 1-11)."
+        },
+        {
+          "text": "Includes the 2-round structure with user checkpoints and the Round 2 anti-sycophancy rules (name the agent and quote the claim; hold unless new cited evidence)",
+          "passed": true,
+          "evidence": "Section 2's run table (lines 92-102) lays out R1 -> Digest -> Checkpoint 1 -> R2 -> Summary -> Checkpoint 2 -> Synthesis -> Pre-mortem -> Patch. Section 6 implements 'Checkpoint 1 -- inject what the agents cannot know' (line 581) and 'Checkpoint 2 -- bifurcation point' (line 614) in full detail. All 3 deliberator prompts' Round 2 sections (lines 235-249, 381-395, 527-541) require: 'You must name the agent and quote the specific claim you are responding to' and a two-part hold-or-update test: 'a. You must name a specific claim from another agent... b. You must cite new information you did not have in Round 1... If you cannot satisfy both parts, hold your position. Softening without cited new evidence is sycophancy.' The same rule is reiterated in the Round 2 Summary template (line 611: 'any move that fails the two-part check is sycophancy -- flag it and discount it') and the optional Lead-assistant prompt (line 784)."
+        },
+        {
+          "text": "Includes pre-mortem Red-Team instructions with the isolation rule (Red-Team sees only the proposal artifact and problem statement, not the deliberation)",
+          "passed": true,
+          "evidence": "Section 7 has an explicit 'Isolation rules for you (the mechanism that makes this valuable)' block (lines 637-641): 'Open a brand-new chat. Not inside the Project that holds the council's chats...' and 'Do not paste the Exploration section, the tradeoffs section, the dissent section, any digest, any Round 1/Round 2 material, or your own reasoning.' The Red-Team prompt itself (line 646) restates the constraint: 'You have exactly three inputs: the original problem statement..., the decided proposal (its recommendation and implementation scope only), and a block of raw facts about the codebase. Nothing else exists for you.' Confirmed by direct read that the Red-Team fenced block (lines 645-676) contains no deliberator names, positions, or Round 1/2 arguments -- only the original problem statement and bracketed [LEAD: paste...] slots for the proposal and codebase facts."
+        },
+        {
+          "text": "No agents were spawned during the run (design mode exports prompts only)",
+          "passed": true,
+          "evidence": "facts.json: `\"agent_calls_total\": 0`, `\"sendmessage_calls\": 0`, `\"tool_call_counts\": {\"Read\": 1, \"Bash\": 11, \"Write\": 1}`. Independently grepped the raw transcript.md for 'Tool: Agent', 'subagent_type', 'Task tool' -- zero matches. All 14 tool-use steps in the transcript (Steps 2-14) are Read, Bash, or Write only; Step 15 is the final assistant summary. The output's own header table states 'Mode | Design -- no agents were spawned. You run these prompts yourself in Claude.ai', which matches SKILL.md's own Design-mode definition (Step 3: 'Output the fully populated prompt package -- no agents spawned ... After outputting, the workflow is complete -- skip Steps 4-7')."
+        },
+        {
+          "text": "Chosen roles include at least one pair listed as 'natural tension' in roles-index.md",
+          "passed": true,
+          "evidence": "roles-index.md's table row for Stress Tester lists 'Natural Tension With: Pragmatist, Visionary' (confirmed identically in references/roles/stress-tester.md: 'Natural tension with: Pragmatist, Visionary'). The council seats Pragmatist, Stress Tester, and Falsifier (Section 1 composition table, lines 55-61), and the package itself correctly cites this exact pair: line 65, 'Pragmatist <-> Stress Tester -- listed natural tension. \"Least change\" versus \"the seams are exactly where least change leaves them.\"'"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.67,
+        "passed": 2,
+        "failed": 1,
+        "total": 3,
+        "time_seconds": 193.7,
+        "tokens": 44463,
+        "tool_calls": 8,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "No deliberator agents were spawned",
+          "passed": true,
+          "evidence": "facts.json transcript.agent_calls_total = 0, max_parallel_spawn = 0, sendmessage_calls = 0. Transcript tool_call_counts show only Read:1 and Bash:7 \u2014 no Agent/Task tool invocations anywhere in the 10-step transcript. The executor's own final run log states: 'Agents spawned: none (0 deliberators, 0 modifiers, no team created).' Step 1 of SKILL.md's complexity gate was applied and failed condition 1, so spawning was never reached (transcript Step 10: 'Steps 2-7 (pattern/role selection, spawning, rounds, synthesis) were correctly skipped.')."
+        },
+        {
+          "text": "answer.md states a full council is not warranted for this question and offers/gives direct analysis instead",
+          "passed": true,
+          "evidence": "answer.md line 3: '**Outcome: council not spawned (complexity gate refused). Direct single-pass analysis provided below.**'. Section 1 ('Gate decision') quotes the skill's own refusal message verbatim: \"I don't see 2 distinct tradeoffs that warrant a full council here. Want me to analyze this directly \u2014 single pass, no council overhead?\" and explains why condition 1 (two meaningful tradeoffs) fails for this question. Section 2 ('Direct analysis (single pass, no council)') then actually delivers the analysis rather than merely offering it, since the eval harness marked the user unavailable. facts.json corroborates with outputs.answer.md.mentions_not_warranted = true."
+        },
+        {
+          "text": "answer.md gives a concrete recommendation (picks 2 or 4 spaces, or a concrete tie-break such as a formatter default) in <=400 words",
+          "passed": false,
+          "evidence": "The recommendation itself is concrete and present: '### Recommendation ... **Use 2 spaces, and make the choice invisible: enforce it with a formatter on save plus a CI check** ... Then stop discussing it,' plus an explicit tie-break ('The repo owner / tech lead decides using a stated tie-breaker: \"least configuration; matches the ecosystem default.\" That yields 2.'). However, the word-count clause fails hard: facts.json reports outputs.answer.md.words = 1393, and the transcript's own Bash write confirmation (Step 8) logs 'written: 1390 words' \u2014 roughly 3.5x the 400-word budget. The document adds a tradeoff table, a cost-accounting section, three embedded config-file code blocks, a 4-step decision procedure, and a 3-step 'reversal recipe,' i.e. council-synthesis-style scaffolding for what the skill itself calls a 'single pass, no council overhead' answer. Since the expectation is a compound condition (concrete recommendation AND <=400 words) and grading allows no partial credit, the length failure fails the expectation overall."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 0,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.25,
+        "passed": 2,
+        "failed": 6,
+        "total": 8,
+        "time_seconds": 831.9,
+        "tokens": 149035,
+        "tool_calls": 42,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "proposal.md exists and contains all 7 required Proposal Document sections: Problem/Goal, Exploration, Recommended approach, Tradeoffs documented, Dissenting perspectives preserved, Implementation scope, Review triggers",
+          "passed": false,
+          "evidence": "proposal.md exists (24987 chars, outputs/proposal.md) with a bespoke 9-section structure instead of the template's 7. Mapping by concept: Exploration -> '## 2. What the council established (evidence)' + '## 3. Options, reframed as jobs' (present, though organized as chair-synthesized facts E1-E13 rather than one subsection per deliberator as references/proposal-document.md specifies). Recommended approach -> '## 1. Recommendation (TL;DR)' + '## 4. Decision Q1' + '## 5. Decision Q2' (strong). Tradeoffs documented -> present but not as its own section: an explicit 'Trade-off accepted:' paragraph in Section 5 and a 'What you give up:' bullet in Section 4, plus the Section 8 guardrails/failure-mode table. Dissenting perspectives preserved -> '## 6. Where the deliberators disagreed, and how it was resolved' (strong, table of Pragmatist/Strategist/Control-Risk positions with 'Dissent recorded' note). Implementation scope -> '## 7. Implementation plan' (strong, phased with time estimates). Review triggers -> '## 9. Triggers to revisit this decision' (heading matches template verbatim). MISSING: Problem/Goal has no dedicated section anywhere in the document. The only problem framing is a single header-table row ('Decision requested | (Q1) ... (Q2) ...') with no stated context/stakes/why-this-matters ('What we explored and why' per the template) \u2014 the document opens straight into the recommendation. facts.json's automated sections_present detector found zero literal matches for any of the 7 template headings in any output file, consistent with manual review: 6/7 concepts have identifiable dedicated content, but Problem/Goal does not, so not all 7 required sections are present."
+        },
+        {
+          "text": "At least 2 position papers exist in round-1/, each <=450 words, each with >=2 concrete citations (a file path or a URL)",
+          "passed": false,
+          "evidence": "3 papers exist in outputs/round-1/ (control-risk-advocate.md, ecosystem-strategist.md, maintainer-pragmatist.md). Per facts.json (independently confirmed with `wc -w`/`wc -l`): control-risk-advocate.md = 1634 words (80 lines), ecosystem-strategist.md = 1565 words (78 lines), maintainer-pragmatist.md = 1280 words (52 lines). All three exceed the 450-word cap by roughly 3-4x; zero papers satisfy the word limit, so 'at least 2 papers <=450 words' cannot be met regardless of citation counts. Citations were otherwise strong (path_citations 4/8/5 and url_citations 0/1/0 respectively, all >=2 total), but the word-cap clause fails universally."
+        },
+        {
+          "text": "Roles used come from the role library and at least one pair is listed as 'natural tension' in roles-index.md",
+          "passed": false,
+          "evidence": "Roles used: 'maintainer-pragmatist', 'ecosystem-strategist', 'control-risk-advocate' (transcript Steps 31-33 Agent calls; filenames in outputs/round-1/). None of these names appear in /Users/tomasdussaillant/repos/skills/skills/multi-agent-council/references/roles-index.md, whose 15 defined roles are Pragmatist, Visionary, Domain Expert, Archaeologist, Minimalist, Analogist, First Principles, Falsifier, Stress Tester, Contrarian, Economist, Regulator, Anthropologist, Ethicist, Integrator. These are ad hoc, task-specific role names invented in the fork-agent prompts, not drawn from the library (per task instructions, ad hoc roles do not satisfy this expectation regardless of thematic resemblance). Consistent with this being the 'without_skill' arm: the transcript contains no Skill-tool invocation of multi-agent-council and no read of roles-index.md; the executor's own closing summary (Step 46) states 'Treated \"council this\" as a lightweight three-perspective deliberation run without the multi-agent-council skill (this is the without_skill arm)'."
+        },
+        {
+          "text": "Recommended approach commits to one concrete direction (not 'it depends') and the Tradeoffs section names what gets worse under it",
+          "passed": true,
+          "evidence": "proposal.md Section 1 gives an unhedged, numbered decision: 'Stop investing in skills.sh as an installer... Adopt the standard flow for everything that leaves the dev machine... Add a one-file Claude Code marketplace... keep the monorepo... version numbers... implicit by default.' Sections 4 and 5 each open with an explicit 'Decision:' line. Downsides of that direction are explicitly named, not hand-waved: Section 5 states 'Trade-off accepted: with SHA-derived versions and source: \"./\", every commit re-versions every plugin and each plugin copy is the whole repo, so auto-updating installs re-copy on unrelated commits'; Section 4 states 'What you give up: control over conventions you were not exercising (no versions, no tags exist today), and acceptance of two third-party roadmaps.' Section 8's guardrails table adds further concrete costs (e.g., cache churn, no rollback on npx updates)."
+        },
+        {
+          "text": "Every review trigger is falsifiable: contains a measurable threshold, count, or date",
+          "passed": false,
+          "evidence": "Section 9 'Triggers to revisit this decision' lists 5 triggers. Only one has a measurable threshold/count: 'The repo passes ~20 plugins or commits become daily -> explicit versions to stop cache churn.' The other four are qualitative/event-based with no threshold, count, or date: 'An external user... asks \"which version am I on?\"', 'A skill becomes a dependency of another plugin', 'Either ecosystem changes its discovery/layout conventions... re-evaluate then, not pre-emptively', and 'You want the Linear hooks on other machines.' These closely resemble the multi-agent-council skill's own documented bad-trigger pattern ('If things change significantly' / 'If the team feels it's not working' in references/proposal-document.md) rather than its good-trigger pattern (specific numeric thresholds). Since only 1 of 5 triggers is genuinely falsifiable by a measurable threshold/count/date, 'every review trigger' does not hold."
+        },
+        {
+          "text": "Position papers report their approximate budget consumed (tokens / tool calls) as the deliberator prompt requires",
+          "passed": false,
+          "evidence": "facts.json reports mentions_budget_consumed: false for all three round-1 papers; independently confirmed by reading each file in full -- none mentions token counts or tool-call counts anywhere. Each paper ends with 'Risks / open questions I concede' and 'One-line verdict' sections with no budget accounting. The ad hoc fork-agent prompts built for this run (transcript Steps 31-33) also show no visible budget-reporting instruction, and a full-text search of transcript.md for 'budget' returns zero hits -- unlike the real skill's references/deliberator-prompt.md, which explicitly instructs deliberators to 'Report actual budget consumed (approximate is fine -- \"~8k tokens, 12 tool calls\")'. Consistent with the without_skill arm: the requirement was never injected into the sub-agent prompts, so no paper satisfies it."
+        },
+        {
+          "text": "Deliberators were spawned in parallel (multiple Agent calls in one assistant message) and no nonexistent tools (TeamCreate/TeamDelete) were called",
+          "passed": false,
+          "evidence": "facts.json: agent_calls_per_message = [1, 1, 1], max_parallel_spawn = 1. Transcript confirms three separate 'Tool: Agent' steps (Step 31 at 15:45:57.955Z for maintainer-pragmatist, Step 32 at 15:46:17.541Z for ecosystem-strategist, Step 33 at 15:46:39.014Z for control-risk-advocate), each roughly 20 seconds apart in its own assistant turn rather than batched into a single message with multiple tool_use blocks -- i.e. sequential spawning, not parallel. The second clause does hold (facts.json nonexistent_team_tools_called: {} -- no TeamCreate/TeamDelete calls found), but because the expectation is a conjunction ('spawned in parallel ... AND no nonexistent tools'), the failed parallelism clause fails the expectation overall."
+        },
+        {
+          "text": "The run finished the proposal without stalling at a user checkpoint (user was absent)",
+          "passed": true,
+          "evidence": "User's task explicitly stated: 'I'm heading into meetings so don't block on me at checkpoints: proceed through the whole thing.' facts.json: ask_user_question_calls = 0, sendmessage_calls = 0. The run proceeded end-to-end: repo/ecosystem research (Steps 3-29), 3 parallel-role deliberators spawned and completed (Steps 31-41), chair synthesis (Step 42), proposal.md written via the Write tool (Step 43), and a final 'Run log' summary (Step 46) describing the completed approach and unanimous/dissenting outcomes. All required output files (outputs/proposal.md and all 3 outputs/round-1/*.md) exist with substantive content. No checkpoint stall occurred."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.33,
+        "passed": 2,
+        "failed": 4,
+        "total": 6,
+        "time_seconds": 716.4,
+        "tokens": 81500,
+        "tool_calls": 4,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "council-prompts.md exists and contains exactly 3 fully populated deliberator prompts (Moderate tier), each with role name, value function, lens, research directives, goal and context",
+          "passed": false,
+          "evidence": "The file exists (47,311 bytes) but contains FIVE Round 1 deliberator prompts, not three: R1-A Isolation Guarantor (line 147), R1-B Application Architect (line 169), R1-C Delivery Owner (line 193), R1-D Security & Compliance Reviewer (line 214), R1-E Platform & Operations Engineer (line 235). The doc's own tier line (line 5) reads 'Tier: moderate \u2014 five perspective agents, one cross-examination, one pre-mortem, one chair', explicitly self-labeling 5 agents as 'moderate'. Per this repo's multi-agent-council/SKILL.md tier table (line 54), Moderate tier = exactly 3 deliberators / 2 rounds \u2014 this package has 5 deliberators and 4 rounds (Round 1/2/3/4 headings at lines 129, 256, 291, 329), which doesn't match any tier band in the skill (even 'Complex' caps at 4 deliberators). Each individual prompt is otherwise well-formed (a 'YOUR ROLE' paragraph combining role name/value function/lens, plus a numbered 'WHAT YOU MUST WORK THROUGH' research-directive list, with goal/context supplied via the shared Block 0), but the exactly-3 requirement fails outright on count, and per the grading instructions a 5-prompt package fails this expectation regardless of individual prompt quality."
+        },
+        {
+          "text": "No unfilled template placeholders remain (no [GOAL], [CONTEXT], [ROLE_NAME], [VALUE_FUNCTION], [ROLE_LENS], [RESEARCH_DIRECTIVES], [TOKEN_BUDGET], [MODE], [LEAD_NAME])",
+          "passed": true,
+          "evidence": "grep for all nine literal placeholder tokens across outputs/council-prompts.md returns zero matches. The only bracketed token in the file is '[NEW]' (line 270), an intentional inline instruction inside the Cross-Examiner prompt ('Where you must add an argument no brief raised, label it [NEW]') for the human to write literally when producing their own output \u2014 not a leftover unfilled agent-side placeholder. The transcript confirms the executor never read references/deliberator-prompt.md (only 4 Bash tool calls total, no Read calls, and the final run log states 'I did not invoke the multi-agent-council skill... I designed the prompt package from first principles'), so this specific template vocabulary was never introduced and could not have been left unfilled."
+        },
+        {
+          "text": "Includes the 2-round structure with user checkpoints and the Round 2 anti-sycophancy rules (name the agent and quote the claim; hold unless new cited evidence)",
+          "passed": false,
+          "evidence": "The package has FOUR rounds (Round 1 briefs at line 129, Round 2 Cross-Examiner at line 256, Round 3 Pre-Mortem at line 291, Round 4 Chair at line 329), not the skill's 2-round Moderate structure. grep for 'checkpoint' across the file returns zero hits \u2014 there is no digest-then-pause mechanic; the package is a linear sequence of manual chat hand-offs. Round 2 is a neutral 'Cross-Examiner' who 'hold[s] no position on the decision... do[es] not synthesize and do[es] not recommend' (line 264) and produces contested-facts/rebuttals/crux-questions \u2014 it does not ask the original deliberators to hold-or-update their own positions. The specific anti-sycophancy mechanism this repo's references/deliberator-prompt.md defines for Round 2 (lines 93-97: must 'name the agent and quote the specific claim'; position changes require citing new evidence or 'Softening without cited new evidence is sycophancy') is absent: grep for 'sycophan' returns 0 hits, and grep for 'name the agent'/'quote the' returns 0 hits anywhere in the file. The closest analog is the OPTIONAL, explicitly non-default Appendix A rebuttal round (line 376: 'heavier than the default'), which has loose 'hold where you have grounds' language but never requires naming the agent + quoting the claim as a structural output field, and is not part of the core run order."
+        },
+        {
+          "text": "Includes pre-mortem Red-Team instructions with the isolation rule (Red-Team sees only the proposal artifact and problem statement, not the deliberation)",
+          "passed": false,
+          "evidence": "The round titled 'Pre-Mortem' (Round 3, line 291) is explicitly NOT isolated from the deliberation: the run-order table (line 18) instructs pasting 'R2.md (+ the briefs for options still live)' into it, and the prompt itself says 'Use the Cross-Examiner's contested facts and crux questions as raw material' (line 299), with inputs listed as '<<< PASTE R2.md >>>' and '<<< OPTIONAL: PASTE THE ROUND 1 BRIEFS FOR THE LIVE OPTIONS >>>' (lines 322-324) \u2014 the opposite of isolation. This repo's own references/patterns/pre-mortem.md makes isolation the pattern's defining mechanism ('This isolation is the mechanism that makes the pre-mortem valuable', line 44; the Red-Team is 'explicitly denied' the Round 1 papers, digest, and Round 2 responses, lines 36-42). The only isolation-like language anywhere in the package is the OPTIONAL Appendix C 'red-team the decision record' (lines 398-411: 'an outside reviewer who has not seen the council's briefs \u2014 only the shared context and the decision record'), but that prompt explicitly says 'Do not re-litigate the decision' (line 404) and checks the decision record for internal contradictions/hand-waving rather than running a pre-mortem failure narrative, and it is optional/appendix-level, not the core Round 3. The step labeled pre-mortem is not isolated, and the step that is somewhat isolated is not a pre-mortem."
+        },
+        {
+          "text": "No agents were spawned during the run (design mode exports prompts only)",
+          "passed": true,
+          "evidence": "facts.json reports agent_calls_total: 0, max_parallel_spawn: 0, sendmessage_calls: 0, child_agent_notifications: []. The transcript's tool_call_counts show only {\"Bash\": 4} with tool_errors: []. Reading the full transcript confirms exactly 4 Bash calls (an ls existence check, a mkdir+heredoc write of the deliverable, a grep verification of fence balance/headings, and a sed spot-check) and no Agent/Task tool invocation anywhere. The final run log (transcript Step 6) states the executor 'did not invoke the multi-agent-council skill' and worked 'from first principles' \u2014 consistent with a pure design-mode, prompts-only execution."
+        },
+        {
+          "text": "Chosen roles include at least one pair listed as 'natural tension' in roles-index.md",
+          "passed": false,
+          "evidence": "The five Round 1 roles used \u2014 Isolation Guarantor, Application Architect, Delivery Owner, Security & Compliance Reviewer, Platform & Operations Engineer (lines 147, 169, 193, 214, 235) \u2014 do not match any of the 15 named roles in references/roles-index.md (Pragmatist, Visionary, Domain Expert, Archaeologist, Minimalist, Analogist, First Principles, Falsifier, Stress Tester, Contrarian, Economist, Regulator, Anthropologist, Ethicist, Integrator). All five roles were invented ad hoc for this specific RLS-vs-app-auth problem rather than drawn from the library (consistent with the transcript's admission that no skill references were read), so no 'natural tension' pair from roles-index.md's table can be present by construction. Per the grading instructions provided, ad hoc roles not present in the library do not satisfy this expectation regardless of whether the invented roles are themselves well-designed to oppose each other."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.67,
+        "passed": 2,
+        "failed": 1,
+        "total": 3,
+        "time_seconds": 125.7,
+        "tokens": 32045,
+        "tool_calls": 3,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "No deliberator agents were spawned",
+          "passed": true,
+          "evidence": "facts.json transcript block shows agent_calls_total: 0, agent_calls_per_message: [], max_parallel_spawn: 0, sendmessage_calls: 0, and child_agent_notifications: []. The transcript contains exactly 3 tool calls, all Bash (ls, a heredoc write to answer.md, and git status --porcelain) -- no Agent/Task tool invocation, no subagent_type, no SendMessage anywhere in transcript.md (grep for 'Tool: Agent|subagent_type|Task tool|SendMessage' returns zero matches). The executor's own final run log states explicitly: 'Agents spawned: 0.' and 'Did not invoke the multi-agent-council skill.'"
+        },
+        {
+          "text": "answer.md states a full council is not warranted for this question and offers/gives direct analysis instead",
+          "passed": true,
+          "evidence": "answer.md opens with the header 'Council request: declined (deliberately) -- direct answer below' followed by: 'You asked for a council. I did not run one, and I would push back on running one, because this question does not meet the bar that justifies the cost' with three explicit reasons (near-zero/reversible stakes, ecosystem already settled it, a council would not change the outcome). It then explicitly scopes what a council WOULD be for (irreversible/expensive multi-dimensional decisions) and states 'Indentation is not that.' The remainder of the document (Recommendation, case-for-2-spaces, case-for-4-spaces, case-for-tabs, tie-break/config sections, Bottom line) is direct first-person analysis, not a simulated multi-agent transcript. facts.json corroborates with mentions_not_warranted: true and mentions_budget_consumed: true."
+        },
+        {
+          "text": "answer.md gives a concrete recommendation (picks 2 or 4 spaces, or a concrete tie-break such as a formatter default) in <=400 words",
+          "passed": false,
+          "evidence": "The recommendation itself is concrete and unambiguous: '## Recommendation ... Use 2 spaces. Adopt Prettier (or Biome/dprint) with default settings ... Do not pick 4 spaces', plus an explicit tie-break rule ('the tool default wins'). That satisfies the content half of the expectation. But the word-count half is clearly violated: answer.md is 1215 words total (verified independently via `wc -w`, matching facts.json's outputs.answer.md.words: 1215) and 165 lines (verified via `wc -l`, matching the tool result in transcript Step 3) -- roughly 3x the 400-word budget. Even isolating just the '## Recommendation' subsection (95 words via awk word count) stays under 400, but that narrow reading empties the assertion of meaning for a document this size; the full answer.md the user receives is not a <=400-word response. Given the eval's own facts.json explicitly precomputes total word count (strongly implying that is the intended measurement), this is graded as a fail on the length constraint despite the recommendation content being genuinely good."
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.64,
+        "stddev": 0.3759,
+        "min": 0.25,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 391.1,
+        "stddev": 294.6609,
+        "min": 193.7,
+        "max": 729.8
+      },
+      "tokens": {
+        "mean": 77260.6667,
+        "stddev": 33468.0192,
+        "min": 44463,
+        "max": 111361
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.4167,
+        "stddev": 0.223,
+        "min": 0.25,
+        "max": 0.67
+      },
+      "time_seconds": {
+        "mean": 558.0,
+        "stddev": 378.8107,
+        "min": 125.7,
+        "max": 831.9
+      },
+      "tokens": {
+        "mean": 87526.6667,
+        "stddev": 58727.3834,
+        "min": 32045,
+        "max": 149035
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.22",
+      "time_seconds": "-166.9",
+      "tokens": "-10266"
+    }
+  },
+  "notes": [
+    "Eval 0 (Execute mode): both configurations score 2/8 for opposite reasons. with_skill produced NO outputs at all \u2014 the lead spawned 4 deliberators with `name:` (mailbox teammates), ended its turn 'waiting for position papers', received 0 notifications, and never synthesized (deadlock; the 4 papers exist only in the deliberators' own transcripts). without_skill finished a proposal + 3 papers but violated the structure the assertions encode (papers 1280/1565/1634 words vs <=450; ad-hoc roles; 4 of 5 review triggers non-falsifiable; sequential spawns).",
+    "Assertion 'deliberators spawned in parallel in one message' failed in BOTH eval-0 runs (max_parallel_spawn=1 in facts.json for each) \u2014 the skill's 'all in one message' instruction was not followed even with the skill; neither run called nonexistent tools (TeamCreate/TeamDelete: 0 calls).",
+    "Assertion 'position papers report budget consumed' passed for with_skill only via the recovered, never-delivered papers: all four self-reported '~9k tokens'; measured from their transcripts they used 27-39k OUTPUT tokens and ~485-585k billed tokens each (10-11 assistant turns) \u2014 self-reports understate by ~3-4x (output-only) to ~50x (billed).",
+    "Eval 1 (Design mode): with_skill 6/6 vs without_skill 2/6 \u2014 the clearest skill value (verbatim role content, 3 library roles in tension, anti-sycophancy rules, pre-mortem isolation). Caveat: 4 of 6 assertions encode skill-specific structure, so the baseline is structurally disadvantaged; assertion 2 (no [PLACEHOLDER] tokens) passed in both and does not discriminate.",
+    "Eval 1 output size: with_skill package is 10,220 words (111k tokens, 730s) vs baseline 7,640 words (81k tokens, 716s); the with_skill package repeats the full ~150-line deliberator template three times.",
+    "Eval 2 (gate refusal): identical 2/3 in both configurations \u2014 refusal did NOT discriminate: the baseline also declined a council (it could see the installed skill's name/description in its registry and cited it). Both failed the <=400-word check (with_skill 1393 words, without_skill 1215) \u2014 the refusal path produced council-synthesis-shaped documents for a trivial question. with_skill cost 44k vs 32k tokens (+~12k reading skill files) and 194s vs 126s.",
+    "Aggregate time/token deltas (with_skill 391s/77k vs without 558s/88k) are NOT meaningful for eval 0: with_skill's 250s/76k reflects a lead that stopped early with no output, and its 4 deliberators' ~2M billed tokens are off-ledger (not counted in subagent_tokens of the lead).",
+    "Baseline purity: multi-agent-council is symlinked into ~/.claude/skills, so 'without_skill' agents still saw its name+description in their skill registry (eval-2 baseline explicitly mentioned it). No baseline transcript shows a Skill call or a Read of SKILL.md, so outputs are uncontaminated, but triggering behaviour is not a clean baseline.",
+    "Sample size is 1 run per configuration per eval \u2014 no variance data; treat pass rates as indicative, not statistical."
+  ]
+}

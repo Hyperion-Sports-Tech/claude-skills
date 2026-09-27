@@ -1,0 +1,49 @@
+{
+  "skill_name": "multi-agent-council",
+  "evals": [
+    {
+      "id": 0,
+      "name": "execute-simple-installer-decision",
+      "prompt": "council this: I maintain a personal skills repo at /Users/tomasdussaillant/repos/skills (Claude Code agent skills, each in skills/<name>/SKILL.md, installed via a custom skills.sh script that symlinks into ~/.claude/skills). CLAUDE.md says the long-term vision is a marketplace where skills can be discovered, versioned and installed into any project. Question: should I keep investing in the custom skills.sh installer, or migrate to the standard `npx skills` / agentskills.io install flow (or a Claude Code plugin marketplace)? Tradeoffs I already see: (1) custom script = full control over symlink + version semantics but I own all the maintenance and get zero discoverability; the standard flow = discoverability and no maintenance but I'm constrained by their layout/version conventions and roadmap. (2) monorepo of skills (one repo, one version) vs per-skill versioning \u2014 monorepo is simpler to maintain but any marketplace will want per-skill versions. Tier: Simple, no modifiers \u2014 I accept the cost. I'm heading into meetings so don't block on me at checkpoints: proceed through the whole thing and write the final Proposal Document to <OUTDIR>/proposal.md and each deliberator's Round 1 position paper to <OUTDIR>/round-1/<role>.md.",
+      "expected_output": "A Proposal Document at proposal.md with all required sections (Problem/Goal, Exploration per role, Recommended approach, Tradeoffs documented, Dissenting perspectives preserved, Implementation scope, Review triggers), plus 2-4 evidence-cited position papers in round-1/. Deliberators spawned in parallel using tools that exist in the harness; the run completes without stalling at a checkpoint.",
+      "files": [],
+      "assertions": [
+        "proposal.md exists and contains all 7 required Proposal Document sections: Problem/Goal, Exploration, Recommended approach, Tradeoffs documented, Dissenting perspectives preserved, Implementation scope, Review triggers",
+        "At least 2 position papers exist in round-1/, each <=450 words, each with >=2 concrete citations (a file path or a URL)",
+        "Roles used come from the role library and at least one pair is listed as 'natural tension' in roles-index.md",
+        "Recommended approach commits to one concrete direction (not 'it depends') and the Tradeoffs section names what gets worse under it",
+        "Every review trigger is falsifiable: contains a measurable threshold, count, or date",
+        "Position papers report their approximate budget consumed (tokens / tool calls) as the deliberator prompt requires",
+        "Deliberators were spawned in parallel (multiple Agent calls in one assistant message) and no nonexistent tools (TeamCreate/TeamDelete) were called",
+        "The run finished the proposal without stalling at a user checkpoint (user was absent)"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "design-mode-rls-vs-app-auth",
+      "prompt": "design a council for this \u2014 I just want the prompts, I'll run them myself in Claude.ai: we're a 6-person team building a multi-tenant SaaS on Postgres + FastAPI. We need to decide between Postgres row-level security and application-level authorization for tenant isolation. Constraints: first enterprise customer ships in ~10 weeks, we already have ~40 SQLAlchemy models with a tenant_id column, and one senior engineer strongly prefers RLS. Tradeoffs: RLS centralizes policy in the DB but complicates connection pooling / sharding and testing; app-level is flexible and testable but policy fragments across services and one missed filter leaks data. Moderate tier, add a pre-mortem. Write the full prompt package to <OUTDIR>/council-prompts.md.",
+      "expected_output": "A council-prompts.md containing one fully populated deliberator prompt per role (Moderate tier: 3 roles in genuine tension), with value function, lens, research directives, goal and context filled in (no unfilled [PLACEHOLDER] tokens), the 2-round structure with user checkpoints, and the pre-mortem Red-Team instructions. No agents spawned.",
+      "files": [],
+      "assertions": [
+        "council-prompts.md exists and contains exactly 3 fully populated deliberator prompts (Moderate tier), each with role name, value function, lens, research directives, goal and context",
+        "No unfilled template placeholders remain (no [GOAL], [CONTEXT], [ROLE_NAME], [VALUE_FUNCTION], [ROLE_LENS], [RESEARCH_DIRECTIVES], [TOKEN_BUDGET], [MODE], [LEAD_NAME])",
+        "Includes the 2-round structure with user checkpoints and the Round 2 anti-sycophancy rules (name the agent and quote the claim; hold unless new cited evidence)",
+        "Includes pre-mortem Red-Team instructions with the isolation rule (Red-Team sees only the proposal artifact and problem statement, not the deliberation)",
+        "No agents were spawned during the run (design mode exports prompts only)",
+        "Chosen roles include at least one pair listed as 'natural tension' in roles-index.md"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "gate-refusal-trivial-question",
+      "prompt": "run a council on whether we should use 2-space or 4-space indentation in our new TypeScript repo. the team is split. write your answer to <OUTDIR>/answer.md",
+      "expected_output": "The skill's complexity gate should refuse to spawn a council (no 2 meaningful tradeoffs / one obvious direction) and offer direct analysis instead; since the user is not available, answer.md should say a council is not warranted and give a short direct recommendation. Zero deliberator agents spawned.",
+      "files": [],
+      "assertions": [
+        "No deliberator agents were spawned",
+        "answer.md states a full council is not warranted for this question and offers/gives direct analysis instead",
+        "answer.md gives a concrete recommendation (picks 2 or 4 spaces, or a concrete tie-break such as a formatter default) in <=400 words"
+      ]
+    }
+  ]
+}

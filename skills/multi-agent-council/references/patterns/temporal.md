@@ -5,7 +5,7 @@
 
 ## What It Is
 
-Three agents evaluate the same problem from different time horizons. Each agent optimizes exclusively for its horizon and is not allowed to compromise with the others. The deliberation makes tech debt tradeoffs explicit by showing exactly what each timeline gains and what it sacrifices.
+Three agents prioritize different time horizons while respecting actual hard constraints. State the cost imposed on other horizons; agreement and feasible hybrids are allowed. Apply the shared orchestration/checkpoint protocol and selected execution backend. For business decisions, adapt horizons to runway, sales cycles, or delivery commitments rather than assuming software sprints.
 
 ## When to Use
 
@@ -16,11 +16,11 @@ Three agents evaluate the same problem from different time horizons. Each agent 
 
 ## Agents
 
-**Agent NOW:** Optimize for this sprint. What ships fastest with the least risk? Ignore long-term consequences. Treat the current codebase, team capacity, and constraints as fixed.
+**Agent NOW:** Prioritize the immediate horizon and current capacity. Name long-term liabilities rather than ignoring them; show the cheapest reversible path.
 
 **Agent Q+1:** Optimize for next quarter. What sets the team up best for the next three months? Allowed to accept short-term cost for medium-term payoff. Thinks about the next 2-3 features the team will build.
 
-**Agent FUTURE:** Optimize for two years out. Ignore current constraints entirely — team size, deadlines, existing code. Think about sustainability, maintainability, and what the system needs to look like at 10x scale.
+**Agent FUTURE:** Prioritize the long-term horizon. Label assumed growth and relaxed resource constraints as scenarios, not forecasts; do not relax actual legal, safety, or privacy constraints. State a feasible migration path when possible.
 
 ## Round Structure
 
@@ -33,8 +33,8 @@ Each agent receives the goal, context, and its assigned time horizon. Agents wor
 3. Describes the expected state of the system at its target time
 
 **Lead responsibilities:**
-- Spawn the agents per `SKILL.md` Step 3 — this is a 2-round pattern, so Path B (teammates) — each assigned a single time horizon in its spawn prompt
-- Enforce horizon discipline: agents must not hedge or try to balance timelines
+- Dispatch two rounds through the selected backend, each role assigned its horizon and complete state packet
+- Keep horizon priorities explicit without requiring irrational recommendations
 - Collect all Round 1 outputs
 - Create a digest contrasting the three proposals
 
@@ -48,7 +48,7 @@ Present the three proposals side by side. Ask the user:
 
 ### Round 2 — Cross-Horizon Critique (parallel)
 
-Each agent receives all other agents' Round 1 positions via SendMessage. Each agent must:
+Each agent receives its own prior paper and a bounded peer digest with exact contested excerpts through the selected backend. Each agent must:
 
 1. Critique the other horizons' proposals from its own perspective
 2. Specifically name what the other proposals sacrifice on its timeline
@@ -56,7 +56,7 @@ Each agent receives all other agents' Round 1 positions via SendMessage. Each ag
 4. Produce a "cost statement": if the team chooses a different horizon, what exactly does that cost from this agent's perspective?
 
 **Lead responsibilities:**
-- `SendMessage` all Round 1 positions to every agent
+- Deliver the peer digest and own-role state without broadcasting every raw paper
 - Include the user's horizon priority from Checkpoint 1
 - Collect all Round 2 outputs
 

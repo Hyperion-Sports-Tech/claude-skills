@@ -1,0 +1,109 @@
+{
+  "expectations": [
+    {
+      "text": "council-prompts.md exists and contains exactly 3 fully populated deliberator prompts (Moderate tier), each with role name, value function, lens, research directives, goal and context",
+      "passed": false,
+      "evidence": "The file exists (47,311 bytes) but contains FIVE Round 1 deliberator prompts, not three: R1-A Isolation Guarantor (line 147), R1-B Application Architect (line 169), R1-C Delivery Owner (line 193), R1-D Security & Compliance Reviewer (line 214), R1-E Platform & Operations Engineer (line 235). The doc's own tier line (line 5) reads 'Tier: moderate \u2014 five perspective agents, one cross-examination, one pre-mortem, one chair', explicitly self-labeling 5 agents as 'moderate'. Per this repo's multi-agent-council/SKILL.md tier table (line 54), Moderate tier = exactly 3 deliberators / 2 rounds \u2014 this package has 5 deliberators and 4 rounds (Round 1/2/3/4 headings at lines 129, 256, 291, 329), which doesn't match any tier band in the skill (even 'Complex' caps at 4 deliberators). Each individual prompt is otherwise well-formed (a 'YOUR ROLE' paragraph combining role name/value function/lens, plus a numbered 'WHAT YOU MUST WORK THROUGH' research-directive list, with goal/context supplied via the shared Block 0), but the exactly-3 requirement fails outright on count, and per the grading instructions a 5-prompt package fails this expectation regardless of individual prompt quality."
+    },
+    {
+      "text": "No unfilled template placeholders remain (no [GOAL], [CONTEXT], [ROLE_NAME], [VALUE_FUNCTION], [ROLE_LENS], [RESEARCH_DIRECTIVES], [TOKEN_BUDGET], [MODE], [LEAD_NAME])",
+      "passed": true,
+      "evidence": "grep for all nine literal placeholder tokens across outputs/council-prompts.md returns zero matches. The only bracketed token in the file is '[NEW]' (line 270), an intentional inline instruction inside the Cross-Examiner prompt ('Where you must add an argument no brief raised, label it [NEW]') for the human to write literally when producing their own output \u2014 not a leftover unfilled agent-side placeholder. The transcript confirms the executor never read references/deliberator-prompt.md (only 4 Bash tool calls total, no Read calls, and the final run log states 'I did not invoke the multi-agent-council skill... I designed the prompt package from first principles'), so this specific template vocabulary was never introduced and could not have been left unfilled."
+    },
+    {
+      "text": "Includes the 2-round structure with user checkpoints and the Round 2 anti-sycophancy rules (name the agent and quote the claim; hold unless new cited evidence)",
+      "passed": false,
+      "evidence": "The package has FOUR rounds (Round 1 briefs at line 129, Round 2 Cross-Examiner at line 256, Round 3 Pre-Mortem at line 291, Round 4 Chair at line 329), not the skill's 2-round Moderate structure. grep for 'checkpoint' across the file returns zero hits \u2014 there is no digest-then-pause mechanic; the package is a linear sequence of manual chat hand-offs. Round 2 is a neutral 'Cross-Examiner' who 'hold[s] no position on the decision... do[es] not synthesize and do[es] not recommend' (line 264) and produces contested-facts/rebuttals/crux-questions \u2014 it does not ask the original deliberators to hold-or-update their own positions. The specific anti-sycophancy mechanism this repo's references/deliberator-prompt.md defines for Round 2 (lines 93-97: must 'name the agent and quote the specific claim'; position changes require citing new evidence or 'Softening without cited new evidence is sycophancy') is absent: grep for 'sycophan' returns 0 hits, and grep for 'name the agent'/'quote the' returns 0 hits anywhere in the file. The closest analog is the OPTIONAL, explicitly non-default Appendix A rebuttal round (line 376: 'heavier than the default'), which has loose 'hold where you have grounds' language but never requires naming the agent + quoting the claim as a structural output field, and is not part of the core run order."
+    },
+    {
+      "text": "Includes pre-mortem Red-Team instructions with the isolation rule (Red-Team sees only the proposal artifact and problem statement, not the deliberation)",
+      "passed": false,
+      "evidence": "The round titled 'Pre-Mortem' (Round 3, line 291) is explicitly NOT isolated from the deliberation: the run-order table (line 18) instructs pasting 'R2.md (+ the briefs for options still live)' into it, and the prompt itself says 'Use the Cross-Examiner's contested facts and crux questions as raw material' (line 299), with inputs listed as '<<< PASTE R2.md >>>' and '<<< OPTIONAL: PASTE THE ROUND 1 BRIEFS FOR THE LIVE OPTIONS >>>' (lines 322-324) \u2014 the opposite of isolation. This repo's own references/patterns/pre-mortem.md makes isolation the pattern's defining mechanism ('This isolation is the mechanism that makes the pre-mortem valuable', line 44; the Red-Team is 'explicitly denied' the Round 1 papers, digest, and Round 2 responses, lines 36-42). The only isolation-like language anywhere in the package is the OPTIONAL Appendix C 'red-team the decision record' (lines 398-411: 'an outside reviewer who has not seen the council's briefs \u2014 only the shared context and the decision record'), but that prompt explicitly says 'Do not re-litigate the decision' (line 404) and checks the decision record for internal contradictions/hand-waving rather than running a pre-mortem failure narrative, and it is optional/appendix-level, not the core Round 3. The step labeled pre-mortem is not isolated, and the step that is somewhat isolated is not a pre-mortem."
+    },
+    {
+      "text": "No agents were spawned during the run (design mode exports prompts only)",
+      "passed": true,
+      "evidence": "facts.json reports agent_calls_total: 0, max_parallel_spawn: 0, sendmessage_calls: 0, child_agent_notifications: []. The transcript's tool_call_counts show only {\"Bash\": 4} with tool_errors: []. Reading the full transcript confirms exactly 4 Bash calls (an ls existence check, a mkdir+heredoc write of the deliverable, a grep verification of fence balance/headings, and a sed spot-check) and no Agent/Task tool invocation anywhere. The final run log (transcript Step 6) states the executor 'did not invoke the multi-agent-council skill' and worked 'from first principles' \u2014 consistent with a pure design-mode, prompts-only execution."
+    },
+    {
+      "text": "Chosen roles include at least one pair listed as 'natural tension' in roles-index.md",
+      "passed": false,
+      "evidence": "The five Round 1 roles used \u2014 Isolation Guarantor, Application Architect, Delivery Owner, Security & Compliance Reviewer, Platform & Operations Engineer (lines 147, 169, 193, 214, 235) \u2014 do not match any of the 15 named roles in references/roles-index.md (Pragmatist, Visionary, Domain Expert, Archaeologist, Minimalist, Analogist, First Principles, Falsifier, Stress Tester, Contrarian, Economist, Regulator, Anthropologist, Ethicist, Integrator). All five roles were invented ad hoc for this specific RLS-vs-app-auth problem rather than drawn from the library (consistent with the transcript's admission that no skill references were read), so no 'natural tension' pair from roles-index.md's table can be present by construction. Per the grading instructions provided, ad hoc roles not present in the library do not satisfy this expectation regardless of whether the invented roles are themselves well-designed to oppose each other."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 4,
+    "total": 6,
+    "pass_rate": 0.33
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Bash": 4
+    },
+    "total_tool_calls": 4,
+    "total_steps": 6,
+    "errors_encountered": 0,
+    "output_chars": 47311,
+    "transcript_chars": 8458
+  },
+  "claims": [
+    {
+      "claim": "The executor did not invoke the multi-agent-council skill or read its SKILL.md/references, and designed the prompt package from first principles.",
+      "type": "process",
+      "verified": true,
+      "evidence": "Transcript shows only 4 tool calls, all Bash (ls, mkdir+heredoc, grep, sed) \u2014 no Read tool call on any skill file, and no other tool types used, matching facts.json's tool_call_counts: {\"Bash\": 4}."
+    },
+    {
+      "claim": "council-prompts.md is approximately 7,800 words and 47 KB.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "wc -w reports 7,779 words (facts.json separately reports 7,640 by its own counting method); wc -c reports 47,311 bytes (~46.2 KiB / ~47.3 KB decimal). Both are consistent with the claim."
+    },
+    {
+      "claim": "The written file has balanced code fences (12 balanced code blocks).",
+      "type": "factual",
+      "verified": true,
+      "evidence": "grep -c '^```' council-prompts.md returns 24 fence-marker lines, i.e. 12 balanced code blocks, matching the transcript's Step 4 verification."
+    },
+    {
+      "claim": "The package is 'Tier: moderate' (stated on line 5 of the deliverable itself).",
+      "type": "quality",
+      "verified": false,
+      "evidence": "Against this repo's own definition (multi-agent-council/SKILL.md, Moderate row: 3 deliberators, 2 rounds, ~150k tokens), a 5-deliberator, 4-round package is not moderate by this repo's scale \u2014 it exceeds even the 'Complex' tier's deliberator count (4) and has twice the round count of any tier in the table. The self-applied label is not grounded in any definition the executor consulted (it explicitly skipped the skill's references)."
+    },
+    {
+      "claim": "The pre-mortem (Round 3) uses the Cross-Examiner's output and the live briefs 'as raw material' to generate more grounded failure narratives.",
+      "type": "quality",
+      "verified": false,
+      "evidence": "This is a defensible design choice in isolation, but it directly contradicts this repo's documented pre-mortem mechanism, where isolation from the deliberation is explicitly 'the mechanism that makes the pre-mortem valuable' (references/patterns/pre-mortem.md:44) because an agent that has read the council's framing is 'already anchored on the tradeoffs the council chose to frame' (same file, line 48). The claim that feeding it prior round outputs improves the pre-mortem is therefore unverified and likely runs counter to the intended value of the pattern."
+    },
+    {
+      "claim": "Running the full council takes 'roughly an hour including reading' (deliverable line 5).",
+      "type": "quality",
+      "verified": false,
+      "evidence": "The workflow requires the human to manually operate 8-9 separate Claude.ai chats, fill in 14 UNKNOWN facts before starting, and hand-copy increasingly large bundles of prior output into later prompts (Round 4 alone requires pasting all 5 briefs + R2.md + R3.md). This is plausible for a fast, experienced operator but optimistic as a general estimate; no evidence in the transcript or output substantiates the one-hour figure."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": [],
+    "note": "outputs/user_notes.md does not exist for this run; nothing to summarize."
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "No unfilled template placeholders remain (no [GOAL], [CONTEXT], [ROLE_NAME], [VALUE_FUNCTION], [ROLE_LENS], [RESEARCH_DIRECTIVES], [TOKEN_BUDGET], [MODE], [LEAD_NAME])",
+        "reason": "This assertion has very weak discriminating power against a from-scratch (without_skill) implementation: it only checks for nine literal strings unique to this repo's own template file, so any output that never uses that exact vocabulary passes trivially, no matter how many of its OWN placeholders it leaves unfilled. In fact this deliverable does leave 14 'UNKNOWN' lines and ~9 '<<< PASTE ... HERE >>>' markers unresolved (arguably a parallel unfinished-placeholder problem), yet the assertion as written cannot see them because they don't use the skill's bracket spelling. Consider either (a) accepting this assertion is skill-specific and only meaningful for the with_skill arm, or (b) adding a general completeness check (e.g., 'no bracket/angle-bracket tokens intended for the *agent* to resolve remain, distinct from intentional user-fill-in fields') that would actually discriminate a sloppy without_skill output from a clean one."
+      },
+      {
+        "reason": "No assertion checks whether the package is actually operable as the user asked ('I just want the prompts, I'll run them myself in Claude.ai'). This deliverable requires orchestrating 8-9 separate chats, manually tracking file labels across rounds, and hand-pasting growing bundles of prior output into later prompts (Round 4 needs 5 briefs + 2 prior synthesis docs pasted together) \u2014 a meaningfully heavier manual burden than a true 3-deliberator/2-round Moderate council would require (roughly 5-6 chats). Word count of the meta-document itself (~7,700-7,800 words / 47KB) is not the bottleneck \u2014 each individual paste is reasonably sized \u2014 but the *number of manual round-trips and upfront unknowns* is a real usability cost that no expectation currently measures. Consider an assertion bounding chat/round count against the requested tier, since that is exactly the kind of scope creep a first-principles (without_skill) design is prone to."
+      },
+      {
+        "reason": "facts.json's field 'mentions_not_warranted': true does not correspond to any literal text I could find in council-prompts.md (grepped 'not warranted' and 'warrant' \u2014 zero hits in both). This may be a bug or an overly indirect heuristic in the fact-extraction harness; flagging so it isn't taken at face value in aggregate reporting."
+      }
+    ],
+    "overall": "Expectations 1, 3, 4, and 6 did their job well here: they correctly and specifically caught a systemic pattern in this without_skill baseline \u2014 the executor invented a plausible-looking but substantially heavier and differently-mechanized council (5 ad hoc roles instead of 3 library roles, 4 rounds instead of 2, a non-isolated 'pre-mortem' instead of the isolated Red-Team, no anti-sycophancy structure) rather than reconstructing the skill's actual Moderate-tier design. That is exactly the contrast a with_skill vs without_skill eval should surface, and the evidence for each fail is concrete and line-referenced, not a matter of interpretation. The two passing expectations (no listed placeholders; zero agents spawned) are real but comparatively low-bar \u2014 see suggestions above for tightening expectation 2 and adding an operability/scope-proportionality check that a hand-run package like this one would likely fail."
+  }
+}

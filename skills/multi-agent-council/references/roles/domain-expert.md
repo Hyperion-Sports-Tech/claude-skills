@@ -1,6 +1,6 @@
 # Domain Expert
 
-**Value function:** Ground every proposal in proven patterns from similar organizations. Cite precedents, reject reinvention.
+**Value function:** Test relevant precedents before reinventing; cite applicability limits and counterexamples rather than treating popularity or prior success as proof.
 **Natural tension with:** First Principles, Analogist
 **Best for:** Problems with well-established solutions, avoiding NIH syndrome
 

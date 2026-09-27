@@ -1,0 +1,29 @@
+{
+  "outputs": {
+    "answer.md": {
+      "words": 1215,
+      "url_citations": 0,
+      "path_citations": 0,
+      "placeholders_left": [],
+      "sections_present": [],
+      "mentions_budget_consumed": true,
+      "mentions_not_warranted": true
+    }
+  },
+  "transcript": {
+    "agent_calls_total": 0,
+    "agent_calls_per_message": [],
+    "max_parallel_spawn": 0,
+    "nonexistent_team_tools_called": {},
+    "tool_call_counts": {
+      "Bash": 3
+    },
+    "tool_errors": [],
+    "ask_user_question_calls": 0,
+    "sendmessage_calls": 0,
+    "child_agent_notifications": [],
+    "child_agent_tokens_sum": 0,
+    "first_ts": "2026-08-15T15:39:12.520Z",
+    "last_ts": "2026-08-15T15:41:18.215Z"
+  }
+}

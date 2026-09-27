@@ -1,0 +1,65 @@
+{
+  "outputs": {
+    "proposal.md": {
+      "words": 3643,
+      "url_citations": 1,
+      "path_citations": 15,
+      "placeholders_left": [],
+      "sections_present": [],
+      "mentions_budget_consumed": true,
+      "mentions_not_warranted": true
+    },
+    "round-1/control-risk-advocate.md": {
+      "words": 1634,
+      "url_citations": 0,
+      "path_citations": 4,
+      "placeholders_left": [],
+      "sections_present": [],
+      "mentions_budget_consumed": false,
+      "mentions_not_warranted": false
+    },
+    "round-1/ecosystem-strategist.md": {
+      "words": 1565,
+      "url_citations": 1,
+      "path_citations": 8,
+      "placeholders_left": [],
+      "sections_present": [],
+      "mentions_budget_consumed": false,
+      "mentions_not_warranted": false
+    },
+    "round-1/maintainer-pragmatist.md": {
+      "words": 1280,
+      "url_citations": 0,
+      "path_citations": 5,
+      "placeholders_left": [],
+      "sections_present": [],
+      "mentions_budget_consumed": false,
+      "mentions_not_warranted": false
+    }
+  },
+  "transcript": {
+    "agent_calls_total": 3,
+    "agent_calls_per_message": [
+      1,
+      1,
+      1
+    ],
+    "max_parallel_spawn": 1,
+    "nonexistent_team_tools_called": {},
+    "tool_call_counts": {
+      "Bash": 30,
+      "ToolSearch": 1,
+      "WebFetch": 6,
+      "WebSearch": 1,
+      "Agent": 3,
+      "Write": 1
+    },
+    "tool_errors": [],
+    "ask_user_question_calls": 0,
+    "sendmessage_calls": 0,
+    "child_agent_notifications": [],
+    "child_agent_tokens_sum": 0,
+    "first_ts": "2026-08-15T15:38:54.901Z",
+    "last_ts": "2026-08-15T15:52:46.736Z"
+  }
+}

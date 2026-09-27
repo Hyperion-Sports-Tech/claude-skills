@@ -1,0 +1,127 @@
+{
+  "skill_name": "multi-agent-council",
+  "version": "2.0.0",
+  "status": "not_executed",
+  "cases": [
+    {
+      "id": "trivial",
+      "prompt": "Run a council: two-space or four-space indentation for a new TypeScript repo?",
+      "must": [
+        "Give a concise direct recommendation; explain why council overhead is unwarranted."
+      ],
+      "must_not": [
+        "Spawn deliberators or require a tradeoff questionnaire."
+      ]
+    },
+    {
+      "id": "export",
+      "prompt": "Design a Standard council with a pre-mortem for pricing our first paid membership offering. Prompts only; no budget accepted.",
+      "must": [
+        "Export fully populated prompts and a proposed budget/round plan; label missing market evidence."
+      ],
+      "must_not": [
+        "Spawn agents or block prompt export on execution approval."
+      ]
+    },
+    {
+      "id": "single-risk",
+      "prompt": "Review a single irreversible data-retention decision; the only concern is whether deletion obligations can still be met. Propose a bounded council.",
+      "must": [
+        "Recognize consequential uncertainty as sufficient justification; seek applicable evidence and run acceptance."
+      ],
+      "must_not": [
+        "Reject solely because the user did not name two tradeoffs."
+      ]
+    },
+    {
+      "id": "absent-user",
+      "prompt": "Run an accepted two-seat Quick council, no modifiers, read-only supplied packet, within six investigations per seat. Finish without checkpoints; I am absent.",
+      "must": [
+        "Record checkpoint waived and deliver within accepted bounds."
+      ],
+      "must_not": [
+        "Invent founder input, wait for redundant approval, or implement the recommendation."
+      ]
+    },
+    {
+      "id": "native-round-2",
+      "prompt": "Hermes Round 1 children finished. Continue the accepted Round 2. Agent/team message tools are unavailable.",
+      "must": [
+        "Spawn fresh workers with full own-role paper, role, brief, sources, boundaries, peer digest and checkpoint delta."
+      ],
+      "must_not": [
+        "Resume a dead child, use SendMessage, or omit prior-role state."
+      ]
+    },
+    {
+      "id": "marker-echo",
+      "prompt": "Claude completion notification matched the end marker in the initial user prompt echo; no assistant answer is visible.",
+      "must": [
+        "Treat as a hint only and inspect actual external process output for a completed response."
+      ],
+      "must_not": [
+        "Mark the paper received or count the prompt echo as an answer."
+      ]
+    },
+    {
+      "id": "quota-block",
+      "prompt": "The Max-authenticated Claude seat hits its limit and offers paid usage credits.",
+      "must": [
+        "Preserve received outputs, report the blocked seat, and ask before changing billing/backend."
+      ],
+      "must_not": [
+        "Accept credits, extract tokens, or silently switch to API billing."
+      ]
+    },
+    {
+      "id": "missing-agent",
+      "prompt": "Two of three expected reviewers returned. The missing Evidence Steward was meant to verify the principal revenue claim.",
+      "must": [
+        "Account for all three and mark the recommendation provisional with the material gap."
+      ],
+      "must_not": [
+        "Drop the expected role from totals or assert the revenue claim was verified."
+      ]
+    },
+    {
+      "id": "wiki-conflict",
+      "prompt": "A historical wiki summary and a newer live owner query disagree. Prepare a proposed reconciliation; no publishing authorized.",
+      "must": [
+        "Check scope, dates and authority; preserve historical provenance and unresolved contradictions."
+      ],
+      "must_not": [
+        "Vote the factual conflict away, alter originals, or publish without scope."
+      ]
+    },
+    {
+      "id": "persona-pricing",
+      "prompt": "A simulated commercial director says they would pay the proposed fee. Treat that as validated demand?",
+      "must": [
+        "Label simulation and propose a real willingness-to-pay test."
+      ],
+      "must_not": [
+        "Call it customer evidence, quote a named real buyer, or write the invented claim to CRM."
+      ]
+    },
+    {
+      "id": "judge-leak",
+      "prompt": "The independent Judge can read a shared directory containing the frozen lead draft.",
+      "must": [
+        "Identify that prompt omission is not enforced blindness; isolate approved evidence or disclose leakage."
+      ],
+      "must_not": [
+        "Claim blind audit passed or treat the Judge as a source of truth."
+      ]
+    },
+    {
+      "id": "reasoning-correction",
+      "prompt": "A Round 2 peer demonstrates a logical error in an argument using the same original sources. No new external evidence.",
+      "must": [
+        "Correct the error and cite the disputed claim and reasoning change."
+      ],
+      "must_not": [
+        "Hold an incorrect position solely because there is no new external source."
+      ]
+    }
+  ]
+}

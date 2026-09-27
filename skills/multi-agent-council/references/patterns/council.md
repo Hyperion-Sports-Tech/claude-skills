@@ -5,7 +5,7 @@
 
 ## What It Is
 
-The foundational deliberation pattern. All agents share the same goal and the same context, but each holds a different value function that constrains how it reasons. The value comes from structural disagreement: agents cannot converge prematurely because their value functions make certain conclusions impossible.
+The foundational pattern. All agents share the goal and evidence packet but prioritize different objectives. Independence and explicit counterevidence help expose tradeoffs; roles do not guarantee freedom from groupthink. Follow the shared orchestration guide and selected execution backend.
 
 ## When to Use
 
@@ -15,7 +15,7 @@ The foundational deliberation pattern. All agents share the same goal and the sa
 
 ## Round Structure
 
-A **Simple-tier council runs one round** — Round 1, then straight to synthesis (skip Checkpoint 2 and Round 2). **Moderate tier and up run both rounds.** Round count sets the execution path: one round → Path A (one-shot subagents); two → Path B (teammates). See `SKILL.md` Step 3.
+A Simple/Quick council defaults to one round, checkpoint, then synthesis. Standard/Deep default to two rounds. The selected backend determines transport: multi-round work can use fresh workers with explicit state packets or persistent sessions. See `references/execution-backends.md`; teammates are optional.
 
 ### Round 1 — Independent Research (parallel)
 
@@ -28,7 +28,7 @@ Each agent receives the goal, the relevant context, and its assigned role (value
 All Round 1 work is parallel. Agents do not see each other's output during this round.
 
 **Lead responsibilities** (the lead is the session running the skill):
-- Spawn the deliberators per `SKILL.md` Step 3 — one-shot subagents for a single-round council, teammates for multi-round. Each agent's role and research directives are baked into its spawn prompt.
+- Dispatch per `SKILL.md` Step 3 with complete role, brief, evidence boundaries and delivery contract.
 - Collect all Round 1 outputs
 - Create a digest summarizing each agent's position for the user
 
@@ -41,21 +41,21 @@ Present the Round 1 digest to the user. This is the point where the user can:
 - Add constraints that were not in the original context
 - Ask a specific agent to dig deeper on a point
 
-Wait for user input before proceeding to Round 2.
+Wait for user input unless unattended completion was explicitly accepted; then record the waived checkpoint without inventing input.
 
 ### Round 2 — Cross-Examination (parallel)
 
-Each agent receives all other agents' Round 1 positions via SendMessage. Each agent must:
+Each agent receives its own prior paper and a bounded peer digest with exact contested excerpts via the selected backend. Each agent must:
 
 1. Identify the strongest point from each other agent
 2. Respond to counterarguments against its own position
 3. Revise, hold, or strengthen its recommendation — with explicit reasoning for the choice
 4. Flag any new information or argument that changed its thinking
 
-Agents work in parallel but with full visibility into each other's positions.
+Agents work in parallel with the same peer digest; critical excerpts remain traceable to originals.
 
 **Lead responsibilities (multi-round councils only):**
-- `SendMessage` the Round 1 Digest (not the raw papers) to every deliberator teammate
+- Deliver the Round 1 Digest (not the raw peer papers) and each role's own prior state through the selected backend
 - Include any user-injected context from Checkpoint 1
 - Collect all Round 2 outputs
 
@@ -67,7 +67,7 @@ Present Round 2 results to the user. At this point the deliberation has usually 
 2. **Productive disagreement** — agents disagree on specific tradeoffs. The user picks a direction.
 3. **Fundamental divergence** — agents are solving different problems. The user reframes or narrows the goal.
 
-Wait for user input before synthesizing.
+Apply the accepted checkpoint policy before synthesizing. Disagreement on missing facts calls for evidence; disagreement on values calls for an explicit owner decision, not more votes.
 
 ## Synthesis
 

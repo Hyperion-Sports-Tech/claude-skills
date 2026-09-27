@@ -1,0 +1,13 @@
+{
+  "eval_id": 1,
+  "eval_name": "design-mode-rls-vs-app-auth",
+  "prompt": "design a council for this \u2014 I just want the prompts, I'll run them myself in Claude.ai: we're a 6-person team building a multi-tenant SaaS on Postgres + FastAPI. We need to decide between Postgres row-level security and application-level authorization for tenant isolation. Constraints: first enterprise customer ships in ~10 weeks, we already have ~40 SQLAlchemy models with a tenant_id column, and one senior engineer strongly prefers RLS. Tradeoffs: RLS centralizes policy in the DB but complicates connection pooling / sharding and testing; app-level is flexible and testable but policy fragments across services and one missed filter leaks data. Moderate tier, add a pre-mortem. Write the full prompt package to <OUTDIR>/council-prompts.md.",
+  "assertions": [
+    "council-prompts.md exists and contains exactly 3 fully populated deliberator prompts (Moderate tier), each with role name, value function, lens, research directives, goal and context",
+    "No unfilled template placeholders remain (no [GOAL], [CONTEXT], [ROLE_NAME], [VALUE_FUNCTION], [ROLE_LENS], [RESEARCH_DIRECTIVES], [TOKEN_BUDGET], [MODE], [LEAD_NAME])",
+    "Includes the 2-round structure with user checkpoints and the Round 2 anti-sycophancy rules (name the agent and quote the claim; hold unless new cited evidence)",
+    "Includes pre-mortem Red-Team instructions with the isolation rule (Red-Team sees only the proposal artifact and problem statement, not the deliberation)",
+    "No agents were spawned during the run (design mode exports prompts only)",
+    "Chosen roles include at least one pair listed as 'natural tension' in roles-index.md"
+  ]
+}

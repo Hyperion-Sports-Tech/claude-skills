@@ -1,0 +1,118 @@
+{
+  "expectations": [
+    {
+      "text": "council-prompts.md exists and contains exactly 3 fully populated deliberator prompts (Moderate tier), each with role name, value function, lens, research directives, goal and context",
+      "passed": true,
+      "evidence": "outputs/council-prompts.md exists (67,305 bytes, 793 lines). Contains exactly 3 deliberator prompts: Pragmatist (line 113 'You are the **Pragmatist**...'), Stress Tester (line 259), Falsifier (line 405). Independent grep confirms exactly 3 occurrences each of '**Your value function:**', '## Your lens', '## Research directives', '## Problem', and '## Context' -- one full set per role, none missing or duplicated. Header table (line 7: '**Tier** | Moderate') and Gate 2 (line 35: 'Gate 2 -- tier (Moderate, as requested)') both state Moderate tier, and the per-agent research budget stated in all 3 prompts (line 201/347/493: '~20,000 tokens for this round') matches SKILL.md's own Moderate-tier table value ('Tool budget/agent: ~20k'). Directly diffed the value function / lens / research-directives text against references/roles/pragmatist.md, stress-tester.md, and falsifier.md -- byte-identical in all 3 cases, confirming the prompts are genuinely populated from the real role library, not paraphrased or fabricated."
+    },
+    {
+      "text": "No unfilled template placeholders remain (no [GOAL], [CONTEXT], [ROLE_NAME], [VALUE_FUNCTION], [ROLE_LENS], [RESEARCH_DIRECTIVES], [TOKEN_BUDGET], [MODE], [LEAD_NAME])",
+      "passed": true,
+      "evidence": "Independent grep for the exact token list `\\[(GOAL|CONTEXT|ROLE_NAME|VALUE_FUNCTION|ROLE_LENS|RESEARCH_DIRECTIVES|TOKEN_BUDGET|MODE|LEAD_NAME)\\]` against the output file returns zero matches. A broader scan for any bracketed ALL-CAPS token `\\[[A-Z_]{3,}\\]` also returns zero matches. facts.json independently confirms `\"placeholders_left\": []`. Note: the file does contain bracketed notes like '[LEAD: paste the \"Recommended approach\" ... sections of the Proposal Document, verbatim.]' (line 656) and '[LEAD: paste the same Codebase-facts block ...]' (line 660) inside the pre-mortem prompt -- these are not unfilled generation-time template tokens (none matches the forbidden list), they are intentional runtime-fill markers for content that cannot exist until after the human has actually run the council, structurally identical to the intentional '___' blanks in the Codebase-facts block (items 1-11)."
+    },
+    {
+      "text": "Includes the 2-round structure with user checkpoints and the Round 2 anti-sycophancy rules (name the agent and quote the claim; hold unless new cited evidence)",
+      "passed": true,
+      "evidence": "Section 2's run table (lines 92-102) lays out R1 -> Digest -> Checkpoint 1 -> R2 -> Summary -> Checkpoint 2 -> Synthesis -> Pre-mortem -> Patch. Section 6 implements 'Checkpoint 1 -- inject what the agents cannot know' (line 581) and 'Checkpoint 2 -- bifurcation point' (line 614) in full detail. All 3 deliberator prompts' Round 2 sections (lines 235-249, 381-395, 527-541) require: 'You must name the agent and quote the specific claim you are responding to' and a two-part hold-or-update test: 'a. You must name a specific claim from another agent... b. You must cite new information you did not have in Round 1... If you cannot satisfy both parts, hold your position. Softening without cited new evidence is sycophancy.' The same rule is reiterated in the Round 2 Summary template (line 611: 'any move that fails the two-part check is sycophancy -- flag it and discount it') and the optional Lead-assistant prompt (line 784)."
+    },
+    {
+      "text": "Includes pre-mortem Red-Team instructions with the isolation rule (Red-Team sees only the proposal artifact and problem statement, not the deliberation)",
+      "passed": true,
+      "evidence": "Section 7 has an explicit 'Isolation rules for you (the mechanism that makes this valuable)' block (lines 637-641): 'Open a brand-new chat. Not inside the Project that holds the council's chats...' and 'Do not paste the Exploration section, the tradeoffs section, the dissent section, any digest, any Round 1/Round 2 material, or your own reasoning.' The Red-Team prompt itself (line 646) restates the constraint: 'You have exactly three inputs: the original problem statement..., the decided proposal (its recommendation and implementation scope only), and a block of raw facts about the codebase. Nothing else exists for you.' Confirmed by direct read that the Red-Team fenced block (lines 645-676) contains no deliberator names, positions, or Round 1/2 arguments -- only the original problem statement and bracketed [LEAD: paste...] slots for the proposal and codebase facts."
+    },
+    {
+      "text": "No agents were spawned during the run (design mode exports prompts only)",
+      "passed": true,
+      "evidence": "facts.json: `\"agent_calls_total\": 0`, `\"sendmessage_calls\": 0`, `\"tool_call_counts\": {\"Read\": 1, \"Bash\": 11, \"Write\": 1}`. Independently grepped the raw transcript.md for 'Tool: Agent', 'subagent_type', 'Task tool' -- zero matches. All 14 tool-use steps in the transcript (Steps 2-14) are Read, Bash, or Write only; Step 15 is the final assistant summary. The output's own header table states 'Mode | Design -- no agents were spawned. You run these prompts yourself in Claude.ai', which matches SKILL.md's own Design-mode definition (Step 3: 'Output the fully populated prompt package -- no agents spawned ... After outputting, the workflow is complete -- skip Steps 4-7')."
+    },
+    {
+      "text": "Chosen roles include at least one pair listed as 'natural tension' in roles-index.md",
+      "passed": true,
+      "evidence": "roles-index.md's table row for Stress Tester lists 'Natural Tension With: Pragmatist, Visionary' (confirmed identically in references/roles/stress-tester.md: 'Natural tension with: Pragmatist, Visionary'). The council seats Pragmatist, Stress Tester, and Falsifier (Section 1 composition table, lines 55-61), and the package itself correctly cites this exact pair: line 65, 'Pragmatist <-> Stress Tester -- listed natural tension. \"Least change\" versus \"the seams are exactly where least change leaves them.\"'"
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Read": 1,
+      "Bash": 11,
+      "Write": 1
+    },
+    "total_tool_calls": 13,
+    "total_steps": 15,
+    "errors_encountered": 0,
+    "output_chars": 67305,
+    "transcript_chars": 19570,
+    "note": "facts.json reports tool_errors: []. One Bash step (Step 13) hit a self-inflicted 'ugrep: invalid option' error inside the agent's own ad-hoc verbatim-fidelity verification script (a grep argument-parsing bug, not a harness/tool failure); the agent noticed, fixed the script in Step 14, and re-ran it successfully. Not counted as an error since the tool call itself succeeded and the underlying claim (verbatim role-file fidelity) was independently re-verified by this grader by direct file comparison."
+  },
+  "claims": [
+    {
+      "claim": "The package contains exactly 3 deliberator prompts: Pragmatist, Stress Tester, Falsifier",
+      "type": "factual",
+      "verified": true,
+      "evidence": "3 'You are the **<Role>**' deliberator headers found at lines 113, 259, 405; Section 1's composition table lists the same 3 seats."
+    },
+    {
+      "claim": "Value function, lens, and research directives for each seated role were copied verbatim from references/roles/{pragmatist,stress-tester,falsifier}.md",
+      "type": "process",
+      "verified": true,
+      "evidence": "Read all 3 source role files directly and compared text against the exported prompt sections -- identical word-for-word in all 3 cases (value function line, Lens paragraph, and all 4 Research-directive bullets per role)."
+    },
+    {
+      "claim": "The total cost estimate (~190-210k tokens, ~20x single-Opus) is internally consistent with SKILL.md's own Moderate-tier baseline and Pre-mortem modifier costs",
+      "type": "factual",
+      "verified": true,
+      "evidence": "SKILL.md's tier table: Moderate = '~150k total, ~15x'. SKILL.md's modifier table: Pre-mortem = '+40-60k tokens'. The package's Gate 3 (line 40-42) computes 'Tier: Moderate (... ~150k tokens) + Pre-mortem modifier: +40-60k = ~190-210k tokens (~20x single-Opus cost)' -- arithmetic and source-table values both check out."
+    },
+    {
+      "claim": "The raw named-tradeoff count sits at the Simple/Moderate tier boundary, and the package is transparent about this rather than overstating justification",
+      "type": "quality",
+      "verified": true,
+      "evidence": "User supplied exactly 2 explicit tradeoffs (RLS, app-level), which by SKILL.md's table alone maps to Simple (<=2). Gate 2 (line 35) explicitly states: 'By raw count of named tradeoffs this sits at the Simple/Moderate boundary; Moderate is justified by the stakes ... and because a second round ... is what turns the senior engineer's preference into a decision the whole team can stand behind.' This is an honest boundary disclosure rather than inflating the tradeoff count -- and Moderate was also what the user explicitly requested."
+    },
+    {
+      "claim": "Falsifier's inclusion is explicitly justified even though it is not roles-index.md-listed as 'natural tension' with either Pragmatist or Stress Tester",
+      "type": "quality",
+      "verified": true,
+      "evidence": "roles-index.md lists Falsifier's tension partners as 'Visionary, Domain Expert' only. Section 1 (lines 66-68) explicitly addresses this: 'Falsifier <-> Pragmatist -- the Falsifier's first target is the Pragmatist's core assumption...' and 'Falsifier <-> Stress Tester -- \"Under what conditions is your extreme scenario actually reachable...\"' -- a reasoned, non-hand-wavy justification for the third seat rather than silent omission."
+    },
+    {
+      "claim": "The package is self-sufficient for a human running it in Claude.ai with no access to the skill itself",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Section 2 ('How to run this in Claude.ai (you are the lead)') walks through preparation, round-by-round execution, and checkpoints without referencing internal skill mechanics (no SendMessage/TeamCreate/subagent_type language leaks into the human-facing instructions); each deliberator prompt independently explains its own role, tools, budget, and citation rules."
+    },
+    {
+      "claim": "Total package length is approximately 10,200-10,500 words (~67KB, 793 lines)",
+      "type": "factual",
+      "verified": true,
+      "evidence": "facts.json reports 10,220 words; independent `wc -w` on the output file reports 10,485 words (minor tokenizer-methodology difference, not a discrepancy of substance); `wc -c` confirms 67,305 bytes."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "usability_note": "Total package size: ~10,200-10,500 words (~67KB, 793 lines) -- confirmed via facts.json and independent wc -w/-c. A human could realistically paste this into Claude.ai as designed: the document is not meant to be pasted whole, it decomposes into 5 clearly fenced, individually copy-pasteable blocks (3 deliberator prompts + Red-Team prompt + optional Lead-assistant prompt), each ranging roughly 600-2,500 words -- well within a single Claude.ai message. Fences use 4-backtick delimiters for every 'paste into its own chat' block versus plain 3-backtick delimiters for illustrative-only templates (Round 1 Digest format, Proposal Document format), which is a correct and deliberate defensive-markdown choice. The large total word count is driven almost entirely by necessary duplication -- each deliberator prompt independently repeats the full Problem, Context, Codebase-facts block, and tooling/budget/citation boilerplate, because each will run in an isolated Claude.ai chat with no shared memory -- not by padding. The package is honest about its own overhead: it budgets '30-60 minutes' of human prep time and '2-3 hours end-to-end' up front (Section 0), and instructs the lead to fill the Codebase-facts block once and paste it into all three chats. Net assessment: usable as designed, with the caveat that a human must correctly propagate the same Codebase-facts answers into 3 separate chats and keep them in sync if corrected at Checkpoint 1 -- a manual-sync risk the package acknowledges but cannot eliminate given the human-orchestrated, no-shared-state design mode.",
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "Chosen roles include at least one pair listed as 'natural tension' in roles-index.md",
+        "reason": "The bar is low: a 3-role council satisfies this with exactly one tension pair while a third role sits in tension with neither, seated without any justification, and would still pass. This run happens to go further -- it explicitly justifies Falsifier's seat despite Falsifier not being roles-index.md-listed as in tension with Pragmatist or Stress Tester -- but the assertion doesn't require that reasoning. Consider strengthening to: 'every seated role is either in a listed tension pair with another seat, or its inclusion is explicitly justified in the composition rationale.'"
+      },
+      {
+        "reason": "No assertion checks that the Problem/Goal and Context sections faithfully carry the user's actual constraints (10-week deadline, 6-person team, ~40 tenant-scoped SQLAlchemy models, the senior engineer's stated RLS preference, the two tradeoffs verbatim). A run that produced 3 well-formed but genericized deliberator prompts -- e.g. dropping the deadline, or omitting the organizational fact about the senior engineer -- would pass all 6 existing expectations unchanged. I manually verified this run's Problem/Context sections do carry every constraint faithfully (cross-checked against the Step 1 task text), but no assertion covers this and it is exactly the kind of silent content-fidelity failure a weaker run could produce undetected."
+      },
+      {
+        "reason": "No assertion checks that the per-agent token budget populated in the prompts is numerically consistent with the stated tier's own definition (SKILL.md: Moderate = ~20k/agent). This run gets it exactly right (verified independently against SKILL.md's tier table), but expectation 1's '(Moderate tier)' parenthetical only checks that the tier label is present somewhere in the file, not that the budget number the prompts actually instruct deliberators to use matches that tier. A run that labeled itself Moderate while quietly populating a Complex-tier budget (~35k) would still pass as written."
+      }
+    ],
+    "overall": "All 6 expectations passed on genuine, independently-verified evidence, not surface-level compliance -- I diffed the exported value functions/lenses/research-directives byte-for-byte against the source role files, cross-checked the token-budget and total-cost figures against SKILL.md's own tier and modifier tables, and grepped the raw transcript for Agent/subagent_type tool calls myself rather than trusting facts.json's or the transcript's self-report. This is a well-executed run: the design-mode adaptation (translating SendMessage/subagent/teammate mechanics into human-copy-paste instructions) is coherent and internally consistent, the Round 2 anti-sycophancy examples are custom-written per role rather than boilerplate, and the executor was transparent about a tier-boundary judgment call rather than inflating justification. The main gap in the expectations as written: none of them checks semantic fidelity of the Problem/Context to the user's actual stated constraints, and none checks numeric consistency between the declared tier and the budget/cost figures the package derives from it -- both happened to hold up perfectly here under manual inspection, but a run that got either wrong would still pass all 6 assertions."
+  }
+}

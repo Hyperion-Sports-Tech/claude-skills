@@ -2,13 +2,13 @@
 
 **Type:** Modifier (optional, layered on any core pattern)
 **Best for:** High-stakes deliberations where an independent audit of the team lead's synthesis is worth the cost
-**Default:** Disabled. Enabled only at the complexity gate when the user opts in. Not enabled by default below Complex tier.
+**Default:** Disabled; enable only in the accepted run configuration. Applicable after any completed core run, including one round, when an independent check is worth the added work.
 
 ## What it is
 
-The team lead is both the orchestrator and the synthesizer of the council — which means the team lead has every incentive to present the deliberation as "converged" and to edit dissent for cohesion. The Judge is an **independent audit pass** that re-synthesizes from the raw Round 1 and Round 2 position papers **without seeing the team lead's synthesis**, then compares structural properties of the two syntheses. Divergence is the bias signal.
+The lead's digest and synthesis can introduce framing and omission bias. The Judge independently synthesizes from raw completed rounds and authorized source evidence **without seeing the lead's synthesis**. The lead freezes its own draft before reading the Judge's output, then compares both. Divergence is a review signal, not proof that either side is right.
 
-An earlier draft of this modifier was rejected as a sycophantic SPOF because it would have seen the team lead's synthesis and anchored on it, had a subjective rubric, and could loop indefinitely. This version fixes all three issues by (a) never letting the Judge see the synthesis, (b) using only falsifiable rubric items, and (c) capping revisions at 1.
+This is a bounded second synthesis, not a certification. Prompt-level blindness and filesystem isolation are distinct. Report the actual separation achieved; record leakage rather than claiming a blind audit when sources included the lead draft.
 
 ## When to enable
 
@@ -18,76 +18,73 @@ An earlier draft of this modifier was rejected as a sycophantic SPOF because it 
 
 ## When to leave disabled
 
-- Moderate or Simple tier councils (not worth the compound cost)
+- Runs where the added independent check is not worth the declared workload
 - Exploratory runs — the Judge is for final deliverables, not iteration
-- When the user has already decided the direction and wants the council as documentation
+- Pure documentation requests with no request to reassess the decision; do not stage a council as post-hoc endorsement
 
 ## Structure
 
 ### Step 1 — Spawn the Judge as a one-shot subagent
 
-The Judge runs exactly once: it re-synthesizes from the raw rounds and returns one independent proposal. Spawn it as a **subagent**, not a teammate:
-
-- `Agent` tool, `subagent_type`: `general-purpose`
-- **no `team_name`** — the Judge produces a single artifact and does not persist
-- Prompt: the Judge prompt template (see bottom of this file)
-
-The modifier is *enabled* at the complexity gate (see `SKILL.md` Step 1), but the Judge subagent is *spawned* **after Round 2 is collected**, so its prompt can carry the full raw material (Step 2). The Judge applies only to multi-round / Path B councils — a single-round council has no Round 2 to audit.
+The Judge runs one isolated, one-shot analysis through `references/execution-backends.md` after the core rounds are collected. Supply the accepted budget and delivery contract. For a one-round council, use Round 1 only and state that limit; never fabricate Round 2.
 
 ### Step 2 — The Judge's inputs (in its spawn prompt)
 
-Because the Judge is a one-shot subagent, its inputs go in its **spawn prompt**, not a `SendMessage`. The prompt contains:
+Build its independent packet before dispatch:
 
 - The **raw Round 1 position papers** (all deliberators, full text)
-- The **raw Round 2 responses** (all deliberators, full text)
+- The **raw Round 2 responses**, if actually collected
 - The **problem statement** and any user-injected checkpoint context
-- An instruction to use `Read`, `Glob`, `Grep` to verify deliberator citations against the actual code
+- The decision criteria/weights, source ledger, and authorized primary evidence excerpts or scoped read-only retrieval
+- A list of missing contributions and evidence limits; do not hide quality failures
 
 The Judge is **explicitly denied**:
 
 - The team lead's Round 1 Digest
 - The team lead's Round 2 Summary
-- The team lead's synthesis (**this is the critical isolation**; the Judge must never receives the synthesis it is auditing)
+- The team lead's synthesis (**critical isolation**: the Judge never receives the synthesis during its independent pass)
+
+Use a curated inline packet with tools disabled, or enforced source-only access. If workers share unrestricted files, prompt omission is not a blindness guarantee. No access to the run directory containing the lead draft. Missing source verification must be labeled rather than simulated.
 
 ### Step 3 — Judge produces its own independent synthesis
 
-The Judge produces an independent Proposal Document from the raw positions using the same format at `references/proposal-document.md`. Length ≤800 words. It returns the result to the lead as its final output (the subagent tool result).
+The Judge produces an independent proposal using `references/proposal-document.md`, ≤800 words plus compact citations, with a source-support ledger. It evaluates source support for the raw claims, not the unseen lead draft. Return through the selected backend.
 
 ### Step 4 — Team lead produces its own synthesis
 
-The team lead (you, the session running the skill) produces its synthesis per the standard flow. Because the Judge subagent only ever receives the raw rounds — never your synthesis — order does not matter: produce yours before, after, or (spawn the Judge with `run_in_background: true`) while the Judge runs.
+Before inspecting any Judge output, freeze the lead draft at a distinct path and record that ordering. Produce it before dispatch if the backend returns the Judge result immediately. If the lead has already read that result, the comparison is not independent; disclose contamination rather than retroactively claiming a blind draft.
 
 ### Step 5 — Falsifiable rubric comparison (team lead side)
 
-The team lead compares its synthesis against the Judge's synthesis using **only falsifiable rubric items**:
+The lead compares both drafts and the Judge's source-support ledger using auditable checks. The Judge cannot flag defects in a draft it never saw; these are explicitly the lead's comparison findings:
 
-1. **Citation existence** — every claim in the team lead's synthesis must cite a specific position paper section. The Judge's synthesis must cite the same. Any uncited claim is a flag.
-2. **Citation-claim mapping** — each citation must actually support the claim it is attached to. The Judge verifies this by reading the cited source.
+1. **Citation existence** — each material empirical claim traces to an actual source locator, with a separate paper/claim ID for deliberation provenance. Inferences and preferences are labeled, not disguised as empirical claims.
+2. **Citation-claim mapping** — source content supports the scope and date of the claim. The Judge checks available raw claims independently; the lead verifies mappings in both proposals. An existing URL is insufficient.
 3. **Tradeoff naming** — the team lead's synthesis must name each tradeoff explicitly ("choosing X means accepting Y will be worse"). Missing tradeoffs are flagged.
-4. **Dissent preservation** — if any deliberator held a position into Round 2 that was not adopted, both syntheses must surface this under a dissent section. A synthesis that drops Round 2 dissent fails this check.
+4. **Dissent preservation** — both syntheses preserve material dissent from the final completed round, with supporting evidence. Agreement is not required.
 
-**Subjective criteria are explicitly excluded.** Items like "honest tradeoffs," "disproportionate favoring," and "steelmanned dissent" were in an earlier draft and were cut — they are not falsifiable and led to coin-flip verdicts.
+Separate source-support defects from judgment about competing criteria. Do not present qualitative judgment as an objective score or let this checklist imply a correct business decision.
 
 ### Step 6 — Divergence handling (hard cap of 1 revision)
 
-- **Both pass + structurally similar** (same top recommendation, same tradeoffs named, same dissent preserved): ship the team lead's synthesis with a "Judge approved" stamp.
-- **Judge flags a rubric failure in the team lead's synthesis**: team lead gets **exactly one** revision pass directly addressing the Judge's specific objection. The Judge does not re-run.
-- **Judge and team lead disagree on the top recommendation or named tradeoffs**: the user sees **both syntheses** side by side, with the Judge's specific objection. The Judge is not the authority — the user decides.
+- **Both pass + structurally similar:** report "Independent synthesis compared; no material discrepancy found in these checks." Do not use a "Judge approved" certification stamp.
+- **Comparison identifies a defect:** the lead gets **exactly one** revision with claim-level rationale. Keep the original. The Judge does not re-run and cannot approve the revised text.
+- **Material recommendation/weight disagreement:** present both directions and their evidence, with the decision-owner choice made explicit. Under an unattended waiver, retain unresolved disagreement in the provisional report.
 - **The Judge never runs more than once.** No revision loops.
 
 ### Step 7 — Non-blocking on failure
 
-If the Judge crashes, times out, exceeds its budget, or otherwise cannot produce a synthesis, delivery is non-blocking — the Judge cannot hold up shipping:
+If the Judge fails or cannot finish within accepted bounds, delivery of an explicitly provisional analysis is non-blocking:
 
-- Ship the team lead's synthesis with a "Judge unavailable: [reason]" stamp.
-- Log the failure under "Shutdown anomalies" in the Proposal Document.
-- **Never block delivery on the Judge.** The Judge is a quality enhancement, not a gate.
+- Deliver the lead's analysis with "Judge unavailable: [reason]" and its effect on confidence.
+- Log the missing work under Known gaps; log remaining sessions separately under Shutdown anomalies.
+- Do not claim the audit passed or proceed with an action whose authorization required it. This exception permits reporting, not shipping software or taking business action.
 
-A one-shot subagent does not have "silent drops" — it either returns its synthesis or errors out. If the Judge subagent errors, times out, or exceeds budget, handle it per Step 7 (non-blocking).
+Account for the Judge like every expected respondent; failure to receive an artifact is a gap regardless of process status.
 
 ## Budget
 
-The Judge's budget is a fixed add-on per `SKILL.md` Step 1 — typically 30-50k tokens. This covers input (Round 1 + Round 2 + problem statement, ~15-25k tokens) + research tokens (~15-25k) + output (~5k).
+Budget one independent pass, including raw packet size, source checks, and output cap. State observable usage or `unavailable`; do not reuse unmeasured fixed token estimates from earlier versions.
 
 ## Output
 
@@ -96,7 +93,7 @@ When enabled, the Judge adds these sections to the Proposal Document:
 1. **Judge rubric** — 4-item checklist (citation existence, citation-claim mapping, tradeoff naming, dissent preservation) with pass/fail and specific objections.
 2. **Judge divergence summary** — where the Judge's independent synthesis differed from the team lead's, with specific claim-level citations.
 
-If the Judge approved, the rubric section is included but the divergence summary is omitted.
+If no material discrepancy was found, include the checks and their limits without a certification label.
 If the Judge was unavailable, a single "Judge unavailable: [reason]" line replaces both sections.
 
 ## Judge prompt template
@@ -104,13 +101,13 @@ If the Judge was unavailable, a single "Judge unavailable: [reason]" line replac
 Use when spawning the Judge subagent:
 
 ```
-You are the **Judge** on a multi-agent deliberation council. You are NOT a deliberator — you have no value function and no position on the problem. Your job is to independently synthesize a proposal from the raw deliberator outputs and then compare structural properties of your synthesis against whatever the team lead produces (which you will not see).
+You are the **Judge**, an independent synthesis reviewer. Evaluate the raw evidence against the supplied decision criteria. You will NOT see the lead draft, so do not claim to compare or approve it. The lead performs that comparison after freezing its own draft.
 
 Your sole inputs (provided in this prompt):
-- The raw Round 1 position papers: [INJECTED_IN_PROMPT]
-- The raw Round 2 responses: [INJECTED_IN_PROMPT]
+- The raw completed rounds: [RAW_ROUNDS]
 - The problem statement: [GOAL]
-- Codebase access via Read, Glob, Grep — use this to verify deliberator citations against the actual code.
+- Criteria, source ledger, authorized evidence/tools and known gaps: [EVIDENCE_PACKET]
+- Delivery and completion contract: [DELIVERY]
 
 You are explicitly denied access to the team lead's Round 1 Digest, Round 2 Summary, and final synthesis. If you somehow receive them by mistake, do not read them — flag the error in your output.
 
@@ -124,7 +121,7 @@ Failure modes you must avoid:
 - Do not produce a synthesis longer than 800 words — conciseness is a signal of clarity
 - Do not skip citation verification — the rubric depends on it
 
-You have a research budget of [TOKEN_BUDGET] tokens (set by the team lead based on council tier, typically 30-50k).
+Accepted research allowance/timebox: [BUDGET]. Report observable usage or unavailable. Read-only; no edits, external writes, scheduling or additional agents. Label source facts, inferences, simulations and uncertainty. If supplied information leaks the lead draft, flag contamination and do not claim blindness.
 ```
 
 ## Failure mode to watch

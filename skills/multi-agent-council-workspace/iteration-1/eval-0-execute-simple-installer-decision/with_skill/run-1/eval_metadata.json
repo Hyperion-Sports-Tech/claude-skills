@@ -1,0 +1,15 @@
+{
+  "eval_id": 0,
+  "eval_name": "execute-simple-installer-decision",
+  "prompt": "council this: I maintain a personal skills repo at /Users/tomasdussaillant/repos/skills (Claude Code agent skills, each in skills/<name>/SKILL.md, installed via a custom skills.sh script that symlinks into ~/.claude/skills). CLAUDE.md says the long-term vision is a marketplace where skills can be discovered, versioned and installed into any project. Question: should I keep investing in the custom skills.sh installer, or migrate to the standard `npx skills` / agentskills.io install flow (or a Claude Code plugin marketplace)? Tradeoffs I already see: (1) custom script = full control over symlink + version semantics but I own all the maintenance and get zero discoverability; the standard flow = discoverability and no maintenance but I'm constrained by their layout/version conventions and roadmap. (2) monorepo of skills (one repo, one version) vs per-skill versioning \u2014 monorepo is simpler to maintain but any marketplace will want per-skill versions. Tier: Simple, no modifiers \u2014 I accept the cost. I'm heading into meetings so don't block on me at checkpoints: proceed through the whole thing and write the final Proposal Document to <OUTDIR>/proposal.md and each deliberator's Round 1 position paper to <OUTDIR>/round-1/<role>.md.",
+  "assertions": [
+    "proposal.md exists and contains all 7 required Proposal Document sections: Problem/Goal, Exploration, Recommended approach, Tradeoffs documented, Dissenting perspectives preserved, Implementation scope, Review triggers",
+    "At least 2 position papers exist in round-1/, each <=450 words, each with >=2 concrete citations (a file path or a URL)",
+    "Roles used come from the role library and at least one pair is listed as 'natural tension' in roles-index.md",
+    "Recommended approach commits to one concrete direction (not 'it depends') and the Tradeoffs section names what gets worse under it",
+    "Every review trigger is falsifiable: contains a measurable threshold, count, or date",
+    "Position papers report their approximate budget consumed (tokens / tool calls) as the deliberator prompt requires",
+    "Deliberators were spawned in parallel (multiple Agent calls in one assistant message) and no nonexistent tools (TeamCreate/TeamDelete) were called",
+    "The run finished the proposal without stalling at a user checkpoint (user was absent)"
+  ]
+}

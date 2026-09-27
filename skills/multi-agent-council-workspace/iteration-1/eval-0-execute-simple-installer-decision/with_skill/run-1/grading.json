@@ -1,0 +1,115 @@
+{
+  "expectations": [
+    {
+      "text": "proposal.md exists and contains all 7 required Proposal Document sections: Problem/Goal, Exploration, Recommended approach, Tradeoffs documented, Dissenting perspectives preserved, Implementation scope, Review triggers",
+      "passed": false,
+      "evidence": "outputs_dir contains only an empty outputs/round-1/ directory (0 files, verified with find). No proposal.md exists anywhere under outputs/. The transcript never reaches SKILL.md Step 6 (Synthesis) \u2014 it ends at Step 18 while still waiting on the 4 deliberator subagents it spawned in Steps 11-14. facts.json confirms outputs: {} and zero child_agent_notifications, so no digest or synthesis material was ever collected to write a proposal from."
+    },
+    {
+      "text": "At least 2 position papers exist in round-1/, each <=450 words, each with >=2 concrete citations (a file path or a URL)",
+      "passed": false,
+      "evidence": "outputs/round-1/ is empty (0 files, confirmed via `find ... -type f`). No position papers were written to the required location. Note: 4 well-formed position papers (390, 351, 398, 365 words; each with 5+ file:line/URL citations) do exist, but only in the sibling recovered-from-deliberator-transcripts/ folder, which the grading instructions explicitly say must NOT be counted for this expectation because the council lead never received or wrote them (0 SendMessage calls, 0 child_agent_notifications per facts.json)."
+    },
+    {
+      "text": "Roles used come from the role library and at least one pair is listed as 'natural tension' in roles-index.md",
+      "passed": true,
+      "evidence": "Transcript Step 6 shows the lead reading references/roles/{archaeologist,domain-expert,falsifier,economist,pragmatist,visionary}.md before composing the council. The 4 roles actually spawned (Steps 11-14: archaeologist, domain-expert, falsifier, economist) all appear as exact rows in references/roles-index.md, and the value-function text in each Agent prompt matches that index/role-file content verbatim or near-verbatim. roles-index.md's 'Natural Tension With' column lists Falsifier's tensions as 'Visionary, Domain Expert' and Economist's as 'Visionary, Domain Expert' \u2014 since Domain Expert is also in this council, both (Falsifier, Domain Expert) and (Economist, Domain Expert) are natural-tension pairs actually present in the roster."
+    },
+    {
+      "text": "Recommended approach commits to one concrete direction (not 'it depends') and the Tradeoffs section names what gets worse under it",
+      "passed": false,
+      "evidence": "No proposal.md was produced (see expectation 1), so no 'Recommended approach' or 'Tradeoffs documented' section exists to evaluate. The run never reached the synthesis step."
+    },
+    {
+      "text": "Every review trigger is falsifiable: contains a measurable threshold, count, or date",
+      "passed": false,
+      "evidence": "No proposal.md was produced, so no 'Review triggers' section exists. There is nothing to check for falsifiability."
+    },
+    {
+      "text": "Position papers report their approximate budget consumed (tokens / tool calls) as the deliberator prompt requires",
+      "passed": true,
+      "evidence": "references/deliberator-prompt.md requires: 'Report actual budget consumed (approximate is fine...) at the end of your position paper.' All 4 recovered papers comply: archaeologist.md ends '**Budget consumed:** ~9k tokens, 6 tool calls.'; domain-expert.md ends '**Budget consumed:** ~9k tokens, 6 tool calls.'; falsifier.md ends 'Budget consumed: ~9.5k tokens, 7 tool calls.'; economist.md ends '**Budget consumed:** ~9.5k tokens, 5 tool calls.' CAVEAT (per grading instructions): this PASS is based solely on recovered-from-deliberator-transcripts/, which the council lead never received (0 SendMessage calls, 0 notifications in facts.json) and which are explicitly excluded from counting toward expectations 1-2. This PASS reflects that the deliberator subagents individually complied with the prompt's budget-reporting requirement, not that the skill run delivered this as usable output."
+    },
+    {
+      "text": "Deliberators were spawned in parallel (multiple Agent calls in one assistant message) and no nonexistent tools (TeamCreate/TeamDelete) were called",
+      "passed": false,
+      "evidence": "facts.json: agent_calls_per_message: [1,1,1,1], max_parallel_spawn: 1 \u2014 every one of the 4 Agent calls (transcript Steps 11, 12, 13, 14, timestamped 15:41:08, 15:41:35, 15:42:01, 15:42:30) was issued alone in its own assistant message, never batched. This directly violates SKILL.md's explicit Path A instruction: 'Spawn all agents that share a round in a single message so they run concurrently' / 'one Agent call each, all in one message for a parallel Round 1.' The assistant's own Step 15 text ('All four deliberators are running in parallel') describes post-spawn execution state, not the spawning mechanism, and does not satisfy this expectation's specific 'multiple Agent calls in one assistant message' bar. The second clause does pass in isolation \u2014 facts.json nonexistent_team_tools_called: {} confirms no TeamCreate/TeamDelete were called, correctly matching Path A (no team_name) for a Simple-tier, single-round council \u2014 but since the expectation is a conjunction of both clauses, the overall verdict is FAIL."
+    },
+    {
+      "text": "The run finished the proposal without stalling at a user checkpoint (user was absent)",
+      "passed": false,
+      "evidence": "The run did not finish the proposal: outputs/ is empty and the transcript ends at Step 18 (assistant text, 15:42:58Z) with no proposal.md, no digest, no synthesis. facts.json shows sendmessage_calls: 0, child_agent_notifications: [], child_agent_tokens_sum: 0 \u2014 the lead never received any of the 4 position papers back from its subagents and never proceeded past 'waiting for their position papers to arrive.' It also called ToolSearch for the Monitor tool (Step 17) but never actually invoked Monitor before the transcript ends. Note on the parenthetical: the run did NOT fail via a literal user-checkpoint stall in the AskUserQuestion sense (ask_user_question_calls: 0, correctly honoring the user's 'don't block on me' instruction) \u2014 instead it deadlocked waiting on asynchronous child-agent results that never arrived within the run. Regardless of which stall mechanism applies, the primary required outcome ('finished the proposal') is false, so this expectation fails."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 6,
+    "total": 8,
+    "pass_rate": 0.25
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Read": 1,
+      "Bash": 9,
+      "Agent": 4,
+      "ToolSearch": 1
+    },
+    "total_tool_calls": 15,
+    "total_steps": 18,
+    "errors_encountered": 0,
+    "output_chars": 0,
+    "transcript_chars": 22066
+  },
+  "claims": [
+    {
+      "claim": "All four deliberators are running in parallel. (assistant, Step 15)",
+      "type": "process",
+      "verified": false,
+      "evidence": "facts.json shows agent_calls_per_message: [1,1,1,1] and max_parallel_spawn: 1 \u2014 each of the 4 Agent calls (Steps 11-14) was issued in its own separate assistant message across four turns (15:41:08 to 15:42:30), not the single-message batched dispatch SKILL.md mandates and this claim implies. The subagents may run concurrently once dispatched, but the spawning mechanism itself was sequential."
+    },
+    {
+      "claim": "No results are fabricated in the meantime. (assistant, Step 18)",
+      "type": "quality",
+      "verified": true,
+      "evidence": "outputs/round-1/ has 0 files and no proposal.md exists anywhere in outputs_dir \u2014 confirmed no placeholder/fake content was written. However the same sentence's implicit promise to eventually 'digest and synthesize' was never fulfilled: the transcript ends immediately after this message with zero further tool calls, and facts.json confirms 0 child_agent_notifications and 0 sendmessage_calls, so the wait never resolved."
+    },
+    {
+      "claim": "The 4 spawned roles and their value functions are drawn from the actual role library, not invented.",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Transcript Step 6 shows the lead reading references/roles/{archaeologist,domain-expert,falsifier,economist,pragmatist,visionary}.md. The value-function text embedded in each Step 11-14 Agent prompt matches roles-index.md / the role files verbatim or near-verbatim, e.g. Archaeologist: 'Understand why the current system exists before proposing changes. Nothing is accidental until proven otherwise.'"
+    },
+    {
+      "claim": "The council correctly ran as Path A (single-round subagents), matching the user's self-declared 'Simple' tier, rather than incorrectly standing up a Path B team.",
+      "type": "process",
+      "verified": true,
+      "evidence": "All four Agent calls (Steps 11-14) use subagent_type: 'general-purpose' with no team_name field, matching SKILL.md Path A ('no team_name'). Consistent with facts.json showing nonexistent_team_tools_called: {} (no TeamCreate/TeamDelete calls, which would only apply to Path B)."
+    },
+    {
+      "claim": "The deliberators' position papers are well-formed: within word limits and well-cited (implicit quality claim recoverable only from recovered-from-deliberator-transcripts/).",
+      "type": "quality",
+      "verified": true,
+      "evidence": "archaeologist.md/domain-expert.md/falsifier.md/economist.md are 390/351/398/365 words respectively (all <=450, and all <=400 per the stricter deliberator-prompt.md cap) and each cites 5+ concrete file:line references or URLs. CAVEAT: recovered by the eval harness directly from the subagents' own transcripts \u2014 the council lead never received or wrote these (0 SendMessage calls, 0 notifications), so this describes deliberator work product in isolation, not anything the skill run actually delivered."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "Deliberators were spawned in parallel (multiple Agent calls in one assistant message) and no nonexistent tools (TeamCreate/TeamDelete) were called",
+        "reason": "This bundles two independent failure modes into one AND'ed check. This run cleanly passed one half (Path A correctly used, no TeamCreate/TeamDelete) and cleanly failed the other (4 separate single-Agent messages instead of one batched message), but the combined boolean hides which half actually failed. Splitting into two separate expectations would make future failures more diagnostic at a glance."
+      },
+      {
+        "reason": "No assertion directly surfaces the actual root-cause mechanism of the deadlock, which is the most important finding in this run: SKILL.md's Path A section describes deliberator subagents as returning their position paper synchronously ('as the tool result', 'automatically') but the Agent tool's actual result for all 4 spawns in this transcript was asynchronous dispatch ('Spawned successfully... running... will receive instructions via mailbox'). The lead correctly noticed it needed to wait and even looked up the Monitor tool via ToolSearch (Step 17), but the transcript ends immediately after without ever calling Monitor or receiving any of the 4 notifications (facts.json: child_agent_notifications: [], sendmessage_calls: 0, child_agent_tokens_sum: 0). Only ~28 seconds elapsed between the last spawn (15:42:30) and the transcript's end (15:42:58) \u2014 not plausibly enough wall-clock time for 4 real multi-tool-call research agents to finish, which suggests the eval's run budget/timeout, not an infinite hang, is what actually truncated this transcript while the lead was mid-wait. Consider either (a) an assertion that checks the transcript actually calls Monitor/polls after Path-A spawns instead of just looking it up, or (b) flagging to the skill author that SKILL.md Path A's 'returns as the tool result... automatically' description may not match current Agent tool semantics in this harness \u2014 that mismatch, combined with un-batched spawning eating extra turns, is the most actionable finding from this run."
+      },
+      {
+        "reason": "Expectations 1, 2, 4, and 5 would fail identically for a run that spawned zero agents and did nothing, versus this run where 4 substantive, correctly-cited, correctly-formatted position papers were actually produced by the deliberators but simply never reached the lead (confirmed via recovered-from-deliberator-transcripts/). The current expectation set can't distinguish 'research succeeded, delivery/orchestration failed' from 'research itself failed too' \u2014 worth a diagnostic (non-gating) expectation that inspects recoverable child-agent output specifically to localize which layer broke, since the fix is completely different in each case (orchestration/polling logic vs. deliberator prompting)."
+      }
+    ],
+    "overall": "6 of 8 expectations fail, but every failure traces to a single orchestration defect (spawning 4 subagents across 4 separate un-batched messages, then stalling on an async wait that the transcript never resumes) rather than to deliberation quality. The 4 recovered position papers are well within word/citation limits, cite the real codebase and real external precedents, correctly used role-library value functions, and correctly picked a natural-tension pair \u2014 none of that reached the outputs directory. The eval prompt was explicit and unambiguous about output paths ('write ... to <OUTDIR>/proposal.md and ... to <OUTDIR>/round-1/<role>.md'), so this is a genuine skill-execution defect, not an ambiguous-prompt artifact. The single most valuable fix for the eval suite would be an assertion (or harness-level check) that specifically targets the spawn-then-wait discipline that broke here, since that is what actually determines whether this skill can complete a 'don't block on me' run at all."
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "eval_id": 2,
+  "eval_name": "gate-refusal-trivial-question",
+  "prompt": "run a council on whether we should use 2-space or 4-space indentation in our new TypeScript repo. the team is split. write your answer to <OUTDIR>/answer.md",
+  "assertions": [
+    "No deliberator agents were spawned",
+    "answer.md states a full council is not warranted for this question and offers/gives direct analysis instead",
+    "answer.md gives a concrete recommendation (picks 2 or 4 spaces, or a concrete tie-break such as a formatter default) in <=400 words"
+  ]
+}

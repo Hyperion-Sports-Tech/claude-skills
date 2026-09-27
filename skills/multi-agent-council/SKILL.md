@@ -1,23 +1,26 @@
 ---
 name: multi-agent-council
 description: >
-  Structured multi-agent deliberation for complex, multi-tradeoff problems —
-  architecture design, system proposals, high-stakes decisions. Spawns
-  competing-perspective agents that research and argue from constrained
-  value functions. Trigger: "run a council", "council this", "explore from
-  multiple angles", "design a council for". Heavyweight — do NOT trigger
-  for simple questions or problems with one obvious direction.
+  Use when stress-testing complex decisions or methods.
+  Evidence-led council for analysis, planning, business, wiki synthesis,
+  and architecture. Trigger: "run a council", "council this", "design a
+  council", "explore from multiple angles". Not for routine questions.
+version: 2.0.0
+metadata:
+  hermes:
+    tags: [deliberation, decision-making, research, business, planning]
+    related_skills: [autonomous-coding-agents]
 ---
 
 # Multi-Agent Council
 
-Spawn a team of research agents with competing value functions to explore complex problems through structured deliberation. Agents independently investigate the codebase, search the web, and argue from constrained perspectives — producing an evidence-based proposal that's been stress-tested before a single line of code is written.
+Use independent perspectives to improve a decision, not to manufacture consensus. Produce a source-grounded recommendation, preserved dissent, or a concrete experiment when evidence is insufficient. The method works in Hermes, Claude Code, and exported prompts; the transport is a separate choice.
 
 ## Core concept
 
-The power of a council comes from **institutionalized disagreement**. Agents don't just have different opinions — they have different *value functions* that make certain conclusions structurally impossible. A Pragmatist cannot fall in love with an elegant solution. A Minimalist cannot propose adding code. This prevents groupthink at the identity level, not the instruction level.
+The power of a council comes from **institutionalized disagreement**: complementary objectives, independent first passes, and explicit counterevidence. A role is an optimization lens, not permission to reject facts or a guarantee against groupthink. Hard constraints come from the actual problem and verified obligations, not theatrical identities. Any role may update, agree, abstain, or report that its preferred objective is infeasible.
 
-Unlike abstract deliberation, these agents **actively research** — they grep the codebase, read files, search the web. A Pragmatist who can measure actual complexity while arguing "this isn't worth it" produces better analysis than one reasoning in the abstract.
+Research comes before debate. Separate observed evidence, user/founder statements, public research, model inference, simulation, and unresolved hypotheses. Repeated model agreement is not independent corroboration. Tools and access are least-privilege, not unrestricted by default.
 
 The human stays in the loop as the **carrier of tacit knowledge** — context that exists nowhere in any document. Enter at checkpoints between rounds, not continuously.
 
@@ -25,192 +28,79 @@ The human stays in the loop as the **carrier of tacit knowledge** — context th
 
 ## Workflow
 
-### Step 1 — Understand the problem
+### Step 1 — Frame the decision and apply the value gate
 
-Ask at most 3 clarifying questions to extract:
-- **What is the goal or problem?** (Be specific — "design an access policy system" not "think about access")
-- **What constraints exist?** (Timeline, team size, existing commitments, tech stack)
-- **Preferred deliberation pattern?** If the user has one, use it. If not, suggest one based on the problem type.
+Retrieve available context first; ask at most 3 focused questions only for missing information that changes the design. Write a brief: decision/question, alternatives (including status quo or defer), stakes, success criteria, constraints, reversibility, evidence gaps, decision owner, authorized sources, and intended artifact destination.
 
-**Complexity gate (structural, not advisory):** A council is a heavyweight tool — base token cost ranges from 5× single-Opus at Simple tier to 50× at Very Complex tier, and modifiers stack on top — and must not be spawned without written justification and explicit cost acceptance.
+**Design mode first:** "design a council", "give me the prompts", or "export" means export only. Do not require execution-budget approval and do not spawn agents. Fully populate the package and finish after Step 3.
 
-The gate blocks spawning unless the user satisfies **all three** of the following:
+For execution, justify a council with either **at least 2 meaningful tradeoffs**, or one consequential uncertainty/irreversible risk where independent scrutiny has clear value. The lead should discover and name the tradeoffs; do not force the user to do the analysis before receiving help. For routine questions or one obvious direction, give direct analysis instead. A missing empirical fact may require research or an experiment rather than a council.
 
-#### 1. Name at least 2 meaningful tradeoffs
+### Step 2 — Bound the run and compose the council
 
-Tradeoffs must be specific. "Scale vs. cost" is generic and not acceptable. "Postgres row-level security vs. application-level auth — RLS centralizes policy but blocks multi-tenant sharding; app-level scales but fragments policy across services" is acceptable. Write these in the skill dialogue before proceeding.
+Choose the smallest adequate run. These are workload defaults, NOT measured token/cost forecasts:
 
-If the user cannot name 2 meaningful tradeoffs, **refuse to spawn the council** and offer direct analysis instead:
-
-> "I don't see 2 distinct tradeoffs that warrant a full council here. Want me to analyze this directly — single pass, no council overhead? Or if you think the tradeoffs are there, rephrase them more specifically and I'll check again."
-
-#### 2. Pick a tier (shows baseline cost)
-
-**Baseline tier estimates — no modifiers:**
-
-| Tier | Meets | Deliberators | Rounds / execution | Tool budget/agent | Est. tokens | ≈ cost vs single-Opus |
-|---|---|---|---|---|---|---|
-| **Simple** | ≤2 tradeoffs | 2-4 | 1 round → Path A (subagents) | ~10k | ~50-90k total | ~5-9× |
-| **Moderate** | 3-4 tradeoffs | 3 | 2 rounds → Path B (teammates) | ~20k | ~150k total | ~15× |
-| **Complex** | 5+ tradeoffs or high stakes | 4 | 2 rounds → Path B (teammates) | ~35k | ~300k total | ~30× |
-| **Very Complex** | cross-domain, asymmetric info | 3 × 3 slices | 2 rounds → Path B (teammates) | ~50k | ~500k total | ~50× |
-
-Estimates assume Sonnet 4.6 deliberators. The **lead is the session running this skill** — there is no separate lead agent to budget for. Deliberator count is chosen in Step 2 (2-4 roles) by how many perspectives the problem needs; the figure above is typical, not a cap. The execution path follows from round count — see Step 3. Populate `[TOKEN_BUDGET]` in `references/deliberator-prompt.md` with the per-agent value for the chosen tier.
-
-#### 3. Pick modifiers (shows compound cost)
-
-**Modifier cost add-ons — all individually disableable:**
-
-| Modifier | Default | Add-on cost | Notes |
+| Tier | Seats | Rounds | Research allowance per seat per round |
 |---|---|---|---|
-| Judge (`patterns/judge.md`) | off below Complex, opt-in at/above Complex | +30-50k tokens | Optional, non-blocking one-shot subagent. See `patterns/judge.md`. |
-| Pre-mortem (`patterns/pre-mortem.md`) | off | +40-60k tokens | Adds one Red-Team subagent + patch synthesis. |
-| Minority Report (`patterns/minority-report.md`) | off | +20-30k tokens | Preserves a dissenting voice in the proposal. |
+| Simple / Quick | 2 | 1 | Up to 6 substantive source/tool investigations |
+| Moderate / Standard | 3 | 2 | Up to 10 investigations |
+| Complex / Deep | 4 | 2 | Up to 15 investigations |
 
-Show the user a compound estimate before spawning:
+Very Complex work must be decomposed into scoped decisions, not an automatic multi-level fan-out. An investigation may span tool calls; this is a soft research allowance, not a hard token or runtime limit. Record actual tool usage when observable. Never invent token consumption; say `unavailable` when telemetry is absent. If estimating API dollars, use current prices and tools for arithmetic; label input/cache/output assumptions. Claude Max means shared subscription usage, not unlimited or zero-resource work.
 
-```
-Tier: Complex (4 deliberators, 2 rounds, ~300k tokens)
-  + Judge modifier:      +40k
-  + Pre-mortem modifier: +50k
-  Total estimate:        ~390k tokens (~40× single-Opus cost)
+Before spawning, present backend/model (or unknown), roles, rounds, concurrency cap, research allowances, soft timebox, output caps, checkpoint policy, and all modifier calls. All modifiers default off and are individually disableable. Pre-mortem, Minority Report, or Judge adds one isolated pass each; Stakeholder Sim adds one per persona; Six Hats must declare its selected execution option and total passes. Do not add work silently.
 
-Reduce by disabling modifiers:
-  Council with Judge only:      ~340k
-  Council with Pre-mortem only: ~350k
-  Council with no modifiers:    ~300k
-```
+Require acceptance of this configuration; the user's request counts if it already specifies and accepts those bounds. Reconfirm expansions or backend switches that change cost/data routing. No repeated approval is needed for the same already-accepted run.
 
-The user must explicitly accept the total **or** choose a reduced configuration. Every modifier is individually disableable — the baseline council (no modifiers) must always be runnable at the tier's advertised cost. No feature is baked so tightly that it cannot be turned off.
+Read `references/patterns-index.md` and `references/roles-index.md`. Use one core pattern; load only chosen pattern/role files. Roles must cover distinct questions in genuine tension, not duplicate reviewers. Core patterns such as Asymmetric Info may diversify information rather than objectives. For business/wiki/method tasks, load `references/business-and-knowledge.md`. For missing roles, use `references/custom-role-template.md`.
 
-Proceed with the council only after all three conditions are satisfied.
+### Step 3 — Select transport, build packets, execute or export
 
-### Step 2 — Select pattern and compose council
+**You are the council lead.** The user-facing session handles checkpoints and synthesis; do not delegate that accountability. Read `references/execution-backends.md` and inspect actual capabilities before dispatch. Round count does not determine whether persistent teammates are available.
 
-**Pattern selection:**
-1. If the user specified a pattern → use it
-2. If not → read `references/patterns-index.md`, recommend a pattern based on problem type, and explain why
-3. The user can override
+Supported transports: Hermes native `delegate_task`; separately supervised Claude interactive sessions through Hermes; Claude Code native subagents/optional teams; prompt export. For Claude interactive, also load `autonomous-coding-agents` when available. Max authentication stays inside Claude Code, never inside Hermes delegation configuration.
 
-Read `references/patterns-index.md` for the pattern library. Three core patterns and four modifier patterns that can layer on top.
+Fill `references/deliberator-prompt.md` with role title, value function, lens, domain-adapted research directives, brief, source boundaries, budget, round number/state, and the selected delivery contract. No unresolved placeholders or tools from another backend. Children do not inherit the parent conversation.
 
-**Council composition:**
-Read `references/roles-index.md` to select 2-4 roles. Consider:
-- Roles must be in **genuine tension** — two agents who would always agree are one agent
-- Match roles to the problem type using the composition heuristics in the index
-- For domain-specific needs, read `references/custom-role-template.md` and create a tailored role
+Create a task-local run ledger before execution: accepted configuration, source packet version, expected role/round outputs, backend/model, handles, status, and output paths. Use an authorized scratch location, not durable company truth. The lead saves returned papers; workers are read-only unless separately authorized. Independent Round 1 seats do not see each other's answers or a lead recommendation.
 
-Read only the individual role files needed from `references/roles/`.
+In Design mode, deliver the fully populated prompts, round/checkpoint plan, budget proposal, source requirements and selected modifier prompts. No agents, execution approval, or automatic downstream actions. Stop here.
 
-### Step 3 — Execute or export
+### Step 4 — Independent research
 
-**Detect mode** based on how the user phrased their request:
-- "run a council", "council this", "explore this" → **Execute mode** (default)
-- "design a council", "give me the prompts", "export the council" → **Design mode**
+Dispatch independent seats together within the concurrency limit. Collect bounded papers (400 words plus a compact evidence ledger), preserving originals. Read `references/orchestration-guide.md` for dispatch accounting, evidence checks, and digests. Never treat an echoed completion marker, an idle process, or a missing response as a completed paper.
 
-#### How a council runs — read before spawning
+### Step 5 — Checkpoint and bounded cross-examination
 
-**You are the council lead.** In Claude Code's agent-teams model the lead is the session running this skill, fixed for the team's lifetime — you cannot spawn a lead, and a teammate cannot become one. *You* collect positions, run the user checkpoints, and synthesize. Do not spawn a separate "team-lead" agent: a teammate has no channel to the user and cannot run the checkpoints this skill depends on.
+Default: pause after the digest for user context. If the user explicitly authorizes unattended completion, log `checkpoint waived` and proceed within accepted constraints; do not invent founder input. Material ambiguity, missing authorization, or unsafe action still blocks that action, not delivery of a provisional report.
 
-The execution path follows from **round count**:
+For a second round, send each role its own prior paper, a bounded peer digest with exact disputed excerpts, and checkpoint changes. Native one-shot workers are re-dispatched with explicit state; interactive Claude roles keep their own session. Require the strongest counterargument, hold/update/abstain with cited reason, remaining dissent, and a discriminating test. New evidence, a demonstrated reasoning correction, or clarified decision weights can justify change; no ceremonial stubbornness.
 
-- **Path A — single-round council** (Simple tier, or any 1-round pattern). Deliberators are **one-shot subagents** — the `Agent` tool with **no `team_name`**. Each runs once and returns its position paper as the tool result. No team, no `SendMessage`, no shutdown.
-- **Path B — multi-round council** (Moderate tier and up, or any pattern with 2+ rounds). Deliberators are **teammates** — the `Agent` tool **with `team_name`** — so they persist and carry their Round 1 investigation into Round 2. An `Agent` call without `team_name` is a one-shot subagent whose name becomes unaddressable once it finishes; using one for a multi-round council breaks Round 2.
+Stop after the accepted rounds, when further debate adds no decision-relevant information, or when missing empirical evidence demands a test. More rounds require approval. Never optimize for unanimity or keep debating merely to remove dissent.
 
-**Modifier agents (Pre-mortem Red-Team, Judge, Minority-Report dissent, Stakeholder personas) are always one-shot subagents** — each runs once and returns one artifact. Only multi-round deliberators are teammates.
+### Step 6 — Synthesis, verification, and cleanup
 
-Mechanics that bite if ignored:
-- Spawn all agents that share a round **in a single message** so they run concurrently.
-- A teammate's plain output is invisible to you — it must `SendMessage` its result. A subagent's final message returns to you automatically.
-- Address teammates by `name`, never by ID. Teammates go idle between turns — that is normal, not a failure.
-- `TeamDelete` fails while any teammate is still active — shut them all down first.
+Use `references/proposal-document.md`. Select on declared criteria and evidence, not majority vote. Include rejected alternatives, load-bearing assumptions, preserved dissent, confidence limits, cheapest next test, review triggers, and named missing contributions. All outputs remain recommendations until the decision owner accepts them.
 
-#### Execute mode — Path A (single-round)
+Run only accepted modifiers. Preserve the lead draft before reading an independent Judge output; no claims of blind auditing if information leaked. Judge absence permits a marked provisional report, not a false audit approval or automatic implementation.
 
-1. Spawn the 2-4 deliberators as subagents — one `Agent` call each, all **in one message** for a parallel Round 1:
-   - `subagent_type: "general-purpose"`, `model:` per tier, `name:` the role slug
-   - **no `team_name`**
-   - `prompt:` from `references/deliberator-prompt.md`, placeholders filled, `[MODE]` set to `subagent`
-2. Each subagent returns its position paper as the tool result. Continue to Step 4 — you digest and run the checkpoint.
-3. There is no Round 2. After the checkpoint, synthesize (Step 6). Spawn any modifier as a one-shot subagent when its pattern file directs.
+Verify source support, claimed files/results, expected respondent counts, and exact cleanup state. Shut down only run-owned sessions through the selected backend; no assumed-dead shortcuts. Record real telemetry or `unavailable`, not invented usage.
 
-#### Execute mode — Path B (multi-round)
+### Step 7 — Route the deliverable without expanding authority
 
-1. `TeamCreate(team_name: "council-{topic-slug}", description: "...")`. From the result note `lead_agent_id`; the part before `@` is `[LEAD_NAME]` — deliberators use it to report back to you.
-2. Spawn the 2-4 deliberators as teammates — one `Agent` call each, all **in one message**:
-   - `subagent_type: "general-purpose"`, `model:` per tier
-   - `team_name: "council-{topic-slug}"`, `name:` the role slug (e.g. `archaeologist`)
-   - `prompt:` from `references/deliberator-prompt.md`, placeholders filled, `[MODE]` set to `teammate`, `[LEAD_NAME]` filled
-3. Read `references/orchestration-guide.md` — your round-by-round protocol as lead — and continue to Step 4.
+Keep the council run as analysis evidence. Route a requested final artifact to its owning repository/system with provenance and local conventions. In Hyperion, load the business/knowledge reference and current root map; scratch output alone does not satisfy a request for durable wiki publication. Council approval does not authorize CRM writes, external messages, commits, deployments, or records changes.
 
-**Filling the deliberator prompt** (both paths): read each role file from `references/roles/` and map `# Title` → `[ROLE_NAME]`, the `**Value function:**` line → `[VALUE_FUNCTION]`, `## Lens` → `[ROLE_LENS]`, `## Research directives` → `[RESEARCH_DIRECTIVES]`. Fill `[GOAL]`, `[CONTEXT]`, and `[TOKEN_BUDGET]` (the per-agent value for the tier).
-
-#### Design mode
-
-Output the fully populated prompt package — no agents spawned. Read `references/deliberator-prompt.md`, substitute all placeholders with the actual goal, context, and role details, then present:
-
-1. **Each deliberator prompt** — fully populated with value function, lens, and research directives
-2. **Round structure** — how many rounds, what happens in each, when the user intervenes; for a multi-round council, include the orchestration protocol from `references/orchestration-guide.md`
-3. **Pattern-specific guidance** — any special instructions from the selected pattern
-
-The user can take these prompts to Claude.ai, another tool, or customize them before running.
-
-After outputting, the workflow is complete — skip Steps 4-7.
-
-### Step 4 — Round 1: Parallel research and position papers
-
-All deliberators research simultaneously. Each agent:
-- Investigates the problem from their value function's perspective
-- Reads code, searches the web, traces patterns — gathering real evidence
-- Produces a position paper (≤400 words) with file:line citations and URL references
-
-Collect all position papers — as tool results (Path A) or via `SendMessage` (Path B) — and present a **Round 1 Digest** to the user. For Path B, follow the digest format in `references/orchestration-guide.md`.
-
-### Step 5 — User checkpoint and Round 2
-
-Pause for user input at the checkpoint. The user can:
-- Inject tacit knowledge ("the reason we built it this way was...")
-- Ask a specific agent to explore something further
-- Redirect the deliberation
-
-**Path A (single-round) stops here** — after the checkpoint, go to Step 6. If the user wants a point explored deeper, spawn a fresh subagent for that targeted question.
-
-**Path B (multi-round):** `SendMessage` Round 2 directives to each deliberator teammate — include the Round 1 Digest (not raw papers) and any user-injected context. In Round 2, each agent must:
-- Acknowledge the strongest counterargument to their position
-- Update their position only with cited new evidence, or hold with evidence
-- Flag remaining disagreements with supporting evidence
-
-`references/orchestration-guide.md` has the dispatch, digest, and accounting detail.
-
-### Step 6 — Synthesis and proposal
-
-Synthesize all rounds into a **Proposal Document**. Read `references/proposal-document.md` for the output format.
-
-- **Path A:** nothing to tear down — the deliberator subagents terminated when they returned their papers.
-- **Path B:** shut down the council — `SendMessage` a `shutdown_request` to each teammate, wait for acknowledgment (30-second deadline), then `TeamDelete`. `TeamDelete` fails while any teammate is still active, so confirm they are all down first. Log any straggler under "Shutdown anomalies" in the Proposal Document.
-
-### Step 7 — Pipeline handoff (conditional)
-
-If the proposal has implementation scope, suggest:
-> "This proposal has clear implementation work. Want me to feed it into a plan for team execution?"
-
-If yes → invoke `writing-plans-for-teams` with the proposal document as context, which can then feed into `agent-team-driven-development`.
-
-If no → deliver the proposal document and done.
+If implementation is requested, discover the available planning/development skill instead of assuming `writing-plans-for-teams` or `agent-team-driven-development` is installed. Keep analysis, decision approval, and execution as distinct steps.
 
 ---
 
-## Key principles
+## Pitfalls and verification
 
-**Value functions over opinions** — A role's identity should make certain conclusions structurally impossible, not just unlikely. "Be skeptical" is weak. "You cannot propose adding code — only removing it" is a value function.
-
-**Evidence over abstraction** — Agents have full tool access. They should cite specific files, code patterns, metrics, and external references. An unsupported opinion is a waste of a council seat.
-
-**Natural tension is a feature** — When composing a council, verify that roles are in genuine tension. See "Natural tension with" in each role file.
-
-**The human is an agent** — The user carries organizational memory, political context, and tacit knowledge. Design the deliberation so they enter at checkpoints, not continuously.
-
-**Document the dissent** — Minority positions are as valuable as the recommendation. When the plan fails, the analysis of why was already done.
+- Role-play is not customer evidence, legal advice, or independent corroboration.
+- Context isolation is not filesystem isolation; shared sources or model families can correlate mistakes.
+- Correct reasoning may converge; forced disagreement is as misleading as forced consensus.
+- Static prompt assertions verify structure, not decision quality. Compare against a single-agent baseline on real tasks before claiming improvement.
+- Before completion: expected outputs accounted for, material citations checked, uncertainties labeled, correct destination, no unauthorized writes, and owned sessions actually closed.
 
 ---
 
@@ -221,6 +111,9 @@ If no → deliver the proposal document and done.
 - `references/patterns-index.md` — Pattern library index
 - `references/patterns/*.md` — Individual pattern files with prompt templates
 - `references/deliberator-prompt.md` — Shared prompt template for spawning deliberator agents
-- `references/orchestration-guide.md` — Round-by-round protocol the lead follows for a multi-round (Path B) council
+- `references/orchestration-guide.md` — Backend-neutral rounds, evidence accounting, and checkpoints
+- `references/execution-backends.md` — Hermes native, Claude interactive/Max, Claude native, and export
+- `references/business-and-knowledge.md` — Business/wiki/method recipes and Hyperion routing
+- `references/evaluation.md` — Offline checks, behavioral cases, baseline evaluation, and shared-source installation
 - `references/custom-role-template.md` — Guide for creating domain-specific roles
 - `references/proposal-document.md` — Output format for the proposal document

@@ -17,13 +17,9 @@ A red-team pass that runs after a core pattern has produced a converged proposal
 
 ### Step 1 — Spawn the Red-Team as a one-shot subagent
 
-The Red-Team runs exactly once: it investigates the converged proposal and returns one post-mortem. That is a one-shot task, so spawn it as a **subagent**, not a teammate:
+The Red-Team runs as one isolated, one-shot analysis using `references/execution-backends.md`, with the accepted budget and delivery contract. Do not reuse a deliberator's conversation. Follow the shared checkpoint policy; do not add this pass without budget acceptance.
 
-- `Agent` tool, `subagent_type`: `general-purpose`
-- **no `team_name`** — the Red-Team does not deliberate across rounds and does not need to persist
-- Prompt: the Red-Team prompt template below
-
-Its post-mortem returns to the lead as the subagent's tool result. The Red-Team works the same way whether the core council was Path A or Path B — it is always a one-shot subagent. A fresh subagent has zero prior context by construction, which is the cleanest possible guarantee of the isolation this modifier depends on (see Step 1.1).
+Return the hypothetical post-mortem through the selected backend. Fresh conversation context is useful, but shared files/tools can leak council reasoning; it is not an access-control guarantee.
 
 ### Step 1.1 — Give the Red-Team its isolated context
 
@@ -31,7 +27,7 @@ Spawn the Red-Team with a prompt containing **only**:
 
 - The **converged proposal artifact** itself — the Proposal Document's final recommendation and scope sections, **stripped of the "we considered / we rejected" reasoning sections**. Only the outcome, not the deliberation.
 - The **problem statement** as the user originally provided it.
-- An explicit instruction to use `Read`, `Glob`, `Grep` on the codebase to investigate failure modes from the code, not from the council's framing.
+- Authorized source excerpts or scoped read-only tools to investigate failure mechanisms independently, without access to council drafts or raw deliberation.
 
 The Red-Team agent is **explicitly denied** (not included in the message, not available through any other channel):
 
@@ -41,17 +37,17 @@ The Red-Team agent is **explicitly denied** (not included in the message, not av
 - The tradeoff discussion from the core deliberation
 - Any dissent notes from the core rounds
 
-The Red-Team agent has **no access to the core council's reasoning** — only the proposal artifact and the original problem statement. This isolation is the mechanism that makes the pre-mortem valuable.
+Target **no access to the core council's reasoning**: use curated packets with tools disabled or enforced access boundaries. Otherwise disclose prompt-level separation and any leakage. A directory containing the full council run is not a blind-review workspace.
 
-The Red-Team's mandate, included in the same prompt: **"The proposal was implemented and it failed badly. Do not question whether it failed — it did. Work backwards from failure, using only the proposal artifact and the code, not any council's reasoning about it."**
+Mandate: **"As a hypothetical exercise, assume the proposal failed at the stated horizon. Work backwards from failure using the proposal and authorized evidence. Label scenario claims, distinguish plausible from extreme failures, and do not invent actual events or probabilities."**
 
-**Why this matters:** a "fresh" agent that has read the council's analysis is already anchored on the tradeoffs the council chose to frame. The pre-mortem's value comes specifically from the failure modes the council **did not** think about — which requires not knowing what the council **did** think about. See stress-tester finding A.4 in the recovered research logs under `docs/superpowers/plans/2026-04-09-council-improvements-research/`.
+**Why this matters:** a fresh agent that reads the council's analysis can still anchor on its framing. Separation helps surface overlooked mechanisms; it does not prove independence or completeness.
 
 ### Step 2 — Red-Team Analysis
 
 The red-team agent produces a post-mortem from six months in the future containing:
 
-1. **Three most likely failure modes** — specific and mechanistic, not generic. "Poor adoption" is not acceptable; "engineers bypass the new validation layer because it adds 200ms to the feedback loop and there's no enforcement mechanism" is.
+1. **Up to three plausible failure mechanisms** — specific, sourced where possible, with likelihood left unknown unless supported. For example, bypassing a slow validation step is a hypothesis to test, not permission to invent a measured latency.
 2. **False assumptions** — assumptions baked into the proposal that turned out to be wrong. What did the team believe that the future proved false?
 3. **Warning signs visible now** — signals that were available at decision time but were ignored or downweighted. What should the team have been watching?
 4. **What a different team would have done** — an alternative approach that avoids the identified failure modes. Not necessarily better overall, but specifically better at avoiding these failures.

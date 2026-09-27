@@ -5,7 +5,7 @@
 
 ## What It Is
 
-Agents role-play the humans who will experience the outcome of the decision. Instead of reasoning from epistemic roles (Pragmatist, Visionary), agents simulate specific stakeholders and react to the proposal from their lived perspective. The value is in surfacing usability, onboardability, and operability concerns that abstract analysis misses.
+Agents simulate stakeholder scenarios to generate hypotheses about usability, adoption and operations. They have no lived experience of these stakeholders. Label every output **SIMULATION — not customer evidence**; never present invented quotes, demand, willingness to pay or reactions as observed facts. Use verified role constraints, not imagined private facts about named people.
 
 ## When to Add
 
@@ -34,7 +34,7 @@ Additional personas to consider depending on the problem:
 
 ### Step 1 — Spawn the Persona Agents
 
-Spawn the persona agents as **one-shot subagents** (`Agent` tool, `subagent_type: general-purpose`, **no `team_name`**) — all in one message so they run in parallel. Each runs once and returns its persona feedback as a tool result. Each agent's spawn prompt contains:
+Dispatch each accepted persona as an isolated one-shot pass through `references/execution-backends.md`, together within the concurrency cap. Count every persona in the budget. Each prompt contains:
 
 - The converged proposal from the core deliberation
 - A persona definition: who they are, what they know, what they do not know
@@ -72,7 +72,7 @@ The team lead reviews all persona feedback and produces an **actionability asses
 
 ### User Checkpoint
 
-Present the persona feedback and actionability assessment to the user. The user decides which adjustments to incorporate into the final proposal.
+Present the simulated feedback under the accepted checkpoint policy. Convert consequential hypotheses into interview questions or tests; a simulation cannot establish customer validation. Unattended completion may recommend adjustments but cannot invent user approval.
 
 ## Output
 
@@ -83,6 +83,6 @@ The modifier adds two sections to the proposal document:
 
 ## Notes
 
-- Persona agents should stay fully in character. They should not break character to offer meta-analysis or "also, from an engineering perspective..." commentary.
+- Personas should keep the scenario coherent while explicitly labeling uncertainty and source limits; epistemic honesty outranks staying in character.
 - The most valuable stakeholder sims reveal problems that feel obvious in hindsight — things the team would have caught if they had walked through the user journey before committing to a design.
 - For API/DX decisions, replace the End User persona with the External Developer persona. The scenario should involve building an integration from scratch using only the published docs.

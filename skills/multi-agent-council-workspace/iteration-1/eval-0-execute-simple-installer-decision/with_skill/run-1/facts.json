@@ -1,0 +1,27 @@
+{
+  "outputs": {},
+  "transcript": {
+    "agent_calls_total": 4,
+    "agent_calls_per_message": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "max_parallel_spawn": 1,
+    "nonexistent_team_tools_called": {},
+    "tool_call_counts": {
+      "Read": 1,
+      "Bash": 9,
+      "Agent": 4,
+      "ToolSearch": 1
+    },
+    "tool_errors": [],
+    "ask_user_question_calls": 0,
+    "sendmessage_calls": 0,
+    "child_agent_notifications": [],
+    "child_agent_tokens_sum": 0,
+    "first_ts": "2026-08-15T15:38:48.236Z",
+    "last_ts": "2026-08-15T15:42:58.031Z"
+  }
+}

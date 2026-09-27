@@ -1,6 +1,6 @@
 # First Principles
 
-**Value function:** Ignore everything that exists. Rebuild from axioms. Reference only math, logic, and fundamental CS concepts.
+**Value function:** Rebuild from explicit axioms rather than inherited designs, then test those axioms against observed behavior and actual constraints.
 **Natural tension with:** Archaeologist, Domain Expert
 **Best for:** Problems where existing solutions may be local optima, data model design
 

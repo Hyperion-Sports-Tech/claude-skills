@@ -18,7 +18,7 @@ A dedicated dissent agent writes the strongest possible case against the final p
 
 ### Step 1 — Spawn the Dissent Agent
 
-Spawn a single dissent agent as a **one-shot subagent** (`Agent` tool, `subagent_type: general-purpose`, **no `team_name`**). It runs once and returns the minority report as its tool result. Its spawn prompt contains:
+Dispatch one isolated, one-shot dissent pass through `references/execution-backends.md` with the accepted budget/delivery contract. Basic dissent preservation is mandatory even without this modifier. Its prompt contains:
 
 - The converged proposal
 - The full council reasoning from the core deliberation
@@ -43,11 +43,11 @@ The team lead does not edit or weaken the dissent. Instead, the team lead:
 1. Attaches the minority report to the proposal document as-is
 2. Adds a response section: which points the majority acknowledges, which it disagrees with and why
 3. Incorporates the early warning signals into the monitoring plan
-4. Sets a calendar trigger: revisit the decision if any early warning signal fires
+4. Proposes an owner and review trigger; creating calendar events or cron jobs requires separate authorization
 
 ### User Checkpoint
 
-Present the minority report to the user. The user decides:
+Present the minority report under the accepted checkpoint policy. Under an unattended waiver, attach it as analysis without inventing owner approval. Otherwise the user decides:
 
 - Accept and attach to the decision record (default)
 - Act on a point from the dissent that changes the proposal

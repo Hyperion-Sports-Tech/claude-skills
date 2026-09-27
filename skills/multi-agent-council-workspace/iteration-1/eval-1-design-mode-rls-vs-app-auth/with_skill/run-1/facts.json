@@ -1,0 +1,39 @@
+{
+  "outputs": {
+    "council-prompts.md": {
+      "words": 10220,
+      "url_citations": 0,
+      "path_citations": 3,
+      "placeholders_left": [],
+      "sections_present": [
+        "Problem / Goal",
+        "Exploration",
+        "Recommended approach",
+        "Tradeoffs documented",
+        "Dissenting perspectives preserved",
+        "Implementation scope",
+        "Review triggers"
+      ],
+      "mentions_budget_consumed": true,
+      "mentions_not_warranted": false
+    }
+  },
+  "transcript": {
+    "agent_calls_total": 0,
+    "agent_calls_per_message": [],
+    "max_parallel_spawn": 0,
+    "nonexistent_team_tools_called": {},
+    "tool_call_counts": {
+      "Read": 1,
+      "Bash": 11,
+      "Write": 1
+    },
+    "tool_errors": [],
+    "ask_user_question_calls": 0,
+    "sendmessage_calls": 0,
+    "child_agent_notifications": [],
+    "child_agent_tokens_sum": 0,
+    "first_ts": "2026-08-15T15:39:00.396Z",
+    "last_ts": "2026-08-15T15:51:10.083Z"
+  }
+}

@@ -5,7 +5,7 @@
 
 ## What It Is
 
-Six cognitive modes applied in a fixed sequence, based on Edward de Bono's Six Thinking Hats framework. Each mode enforces a strict constraint on how agents reason — the Black Hat cannot express optimism, the Yellow Hat cannot raise risks. The value is in exhaustive coverage: the sequence guarantees that facts, intuition, risks, benefits, alternatives, and synthesis all receive dedicated attention rather than being mixed together.
+Six cognitive modes applied in sequence, based on Edward de Bono's Six Thinking Hats. Each phase focuses attention; it does not forbid relevant facts or guarantee exhaustive coverage. Follow the shared orchestration/checkpoint protocol and execution backend. This is a coverage technique, not evidence that multiple independent agents examined the problem.
 
 ## When to Add
 
@@ -36,9 +36,9 @@ Applied in this fixed sequence:
 
 The lead can run Six Hats in two ways depending on the situation:
 
-**Option A — Single agent, sequential modes.** One agent cycles through all six hats in order — spawn it as a **one-shot subagent** (all six hats run within its single turn), or, for a quick pass, the lead can wear the hats itself. Best when the problem is well-scoped and does not require deep research at each stage. Faster, but each hat gets less depth.
+**Option A — One sequential pass.** One worker covers the first five hats in a single bounded response; the lead performs Blue Hat synthesis. Alternatively the lead performs all six without additional agents. Declare which option is budgeted. Sequential role switching is not independent review.
 
-**Option B — Team rotation.** The lead applies each hat to all agents in the council sequentially. All agents wear the White Hat together, then all wear Red, and so on. Because agents must carry context across the six passes, they are **teammates** (Path B); if the core council is already a Path B team, reuse it. Best when the problem is complex and benefits from multiple perspectives within each mode. Richer, but takes longer.
+**Option B — Multi-seat rotation.** Each seat performs the first five hats sequentially, carrying explicit state through fresh workers or its own persistent session; the lead alone performs Blue Hat synthesis. Budget five passes per seat plus lead synthesis before dispatch. Do not turn a two-round council into a rotation without acceptance.
 
 In both cases, the sequence is fixed. Do not reorder the hats.
 
@@ -46,8 +46,8 @@ In both cases, the sequence is fixed. Do not reorder the hats.
 
 For each hat in sequence:
 
-1. The team lead announces the current hat and its constraints via SendMessage
-2. Agents produce output strictly within that hat's constraints — breaking character is not permitted
+1. The lead sends the current hat's focus through the selected backend
+2. Agents focus on that mode while preserving facts, hard constraints, and uncertainty labels
 3. The team lead collects the hat's output before moving to the next hat
 
 ### User Checkpoints
@@ -77,6 +77,6 @@ The modifier produces a structured Six Hats analysis that can stand alone or be 
 ## Notes
 
 - The strict sequencing is the point. Do not let agents mix modes — an agent wearing the Yellow Hat who says "but the risk is..." has broken the framework.
-- The Red Hat is often the most valuable and most neglected. Gut reactions from experienced engineers contain compressed pattern-matching that analytical modes cannot replicate. Give it real weight.
+- A human's attributed intuition may carry tacit experience. A model's Red Hat response is a simulated impression, not human intuition or new evidence. Keep that distinction explicit.
 - Green Hat alternatives should be genuinely creative, not minor variations. If the Green Hat only produces "do the same thing but slightly differently," push for more divergent thinking.
 - Six Hats works well as a modifier after Council when the council converged quickly and the team wants to verify nothing was missed.

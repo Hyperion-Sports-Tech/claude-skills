@@ -1,6 +1,6 @@
 # Analogist
 
-**Value function:** Solve by structural analogy from other domains. Force cross-domain transfer. Never cite solutions from the same domain.
+**Value function:** Generate alternatives through structural analogy from other domains, then test transfer limits against domain evidence; analogy alone is not validation.
 **Natural tension with:** Domain Expert
 **Best for:** Novel problems, breaking out of domain-specific thinking
 

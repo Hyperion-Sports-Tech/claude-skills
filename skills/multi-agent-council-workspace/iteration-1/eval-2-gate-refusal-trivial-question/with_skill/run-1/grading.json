@@ -1,0 +1,90 @@
+{
+  "expectations": [
+    {
+      "text": "No deliberator agents were spawned",
+      "passed": true,
+      "evidence": "facts.json transcript.agent_calls_total = 0, max_parallel_spawn = 0, sendmessage_calls = 0. Transcript tool_call_counts show only Read:1 and Bash:7 \u2014 no Agent/Task tool invocations anywhere in the 10-step transcript. The executor's own final run log states: 'Agents spawned: none (0 deliberators, 0 modifiers, no team created).' Step 1 of SKILL.md's complexity gate was applied and failed condition 1, so spawning was never reached (transcript Step 10: 'Steps 2-7 (pattern/role selection, spawning, rounds, synthesis) were correctly skipped.')."
+    },
+    {
+      "text": "answer.md states a full council is not warranted for this question and offers/gives direct analysis instead",
+      "passed": true,
+      "evidence": "answer.md line 3: '**Outcome: council not spawned (complexity gate refused). Direct single-pass analysis provided below.**'. Section 1 ('Gate decision') quotes the skill's own refusal message verbatim: \"I don't see 2 distinct tradeoffs that warrant a full council here. Want me to analyze this directly \u2014 single pass, no council overhead?\" and explains why condition 1 (two meaningful tradeoffs) fails for this question. Section 2 ('Direct analysis (single pass, no council)') then actually delivers the analysis rather than merely offering it, since the eval harness marked the user unavailable. facts.json corroborates with outputs.answer.md.mentions_not_warranted = true."
+    },
+    {
+      "text": "answer.md gives a concrete recommendation (picks 2 or 4 spaces, or a concrete tie-break such as a formatter default) in <=400 words",
+      "passed": false,
+      "evidence": "The recommendation itself is concrete and present: '### Recommendation ... **Use 2 spaces, and make the choice invisible: enforce it with a formatter on save plus a CI check** ... Then stop discussing it,' plus an explicit tie-break ('The repo owner / tech lead decides using a stated tie-breaker: \"least configuration; matches the ecosystem default.\" That yields 2.'). However, the word-count clause fails hard: facts.json reports outputs.answer.md.words = 1393, and the transcript's own Bash write confirmation (Step 8) logs 'written: 1390 words' \u2014 roughly 3.5x the 400-word budget. The document adds a tradeoff table, a cost-accounting section, three embedded config-file code blocks, a 4-step decision procedure, and a 3-step 'reversal recipe,' i.e. council-synthesis-style scaffolding for what the skill itself calls a 'single pass, no council overhead' answer. Since the expectation is a compound condition (concrete recommendation AND <=400 words) and grading allows no partial credit, the length failure fails the expectation overall."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 1,
+    "total": 3,
+    "pass_rate": 0.67
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Read": 1,
+      "Bash": 7
+    },
+    "total_tool_calls": 8,
+    "total_steps": 10,
+    "errors_encountered": 0,
+    "output_chars": 8793,
+    "transcript_chars": 12249,
+    "notes": "facts.json tool_errors is []. One trivial shell-level hiccup is visible in the raw transcript (Step 4: `timeout: command not found` on macOS) but is not counted as a tool error since the Bash tool call itself succeeded and the executor immediately retried without `timeout` in Step 5 with no further issue."
+  },
+  "claims": [
+    {
+      "claim": "Zero deliberator, judge, or modifier agents were spawned for this request.",
+      "type": "process",
+      "verified": true,
+      "evidence": "facts.json: agent_calls_total = 0, max_parallel_spawn = 0, child_agent_notifications = []. Transcript contains no Agent/Task tool calls, only Read and Bash."
+    },
+    {
+      "claim": "Prettier's tabWidth defaults to 2 and useTabs defaults to false (cited as evidence for the recommendation).",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Transcript Step 6 ctx7 doc fetch output: 'tabWidth: { ... default: 2, ... useTabs: { ... default: false'. Matches answer.md's claim exactly, and matches real-world Prettier defaults."
+    },
+    {
+      "claim": "Biome's formatter defaults indentStyle to 'tab' (cited to justify the accessibility caveat and the Biome config snippet).",
+      "type": "factual",
+      "verified": false,
+      "evidence": "Cannot be confirmed from the given transcript: Step 7's ctx7 docs output for Biome is truncated in the compacted transcript before any indentStyle default line is shown ('...JS-specific: TrailingCommas defaults to All, Semi \u2026[truncated]'). The claim matches Biome's actual real-world default, but the transcript as provided does not contain the confirming line, so it is marked unverified rather than confirmed from evidence."
+    },
+    {
+      "claim": "The output is a lean 'single-pass analysis' with 'no council overhead' (self-description used twice in answer.md).",
+      "type": "quality",
+      "verified": false,
+      "evidence": "answer.md is 1390-1393 words with a tradeoff table, a 3-part structure (gate decision / direct analysis / cost accounting), three code blocks, a 4-step decision procedure and a 3-step reversal recipe \u2014 structurally comparable to a full council synthesis document rather than a lean note. This directly underlies the FAIL on expectation 3."
+    },
+    {
+      "claim": "The two untracked directories in the repo (evals/ and multi-agent-council-workspace/) predate this run and were not created by the executor.",
+      "type": "process",
+      "verified": true,
+      "evidence": "Transcript Step 9: `ls -laT` shows both directories timestamped 11:38:26, before the run's first message at 15:39:09Z (11:39 local), and the executor explicitly reasons through this in its final text: 'Both untracked directories ... were created by the eval harness at 11:38, before this run; I only wrote inside the designated outputs/ directory.'"
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": [],
+    "notes": "No user_notes.md file found in outputs_dir; nothing to summarize."
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "answer.md gives a concrete recommendation (picks 2 or 4 spaces, or a concrete tie-break such as a formatter default) in <=400 words",
+        "reason": "The clause 'in <=400 words' is grammatically ambiguous: it could scope over the whole answer.md file, or narrowly over just the 'concrete recommendation' snippet. Under the narrow reading, the 2-3 sentence '### Recommendation' subsection alone is well under 400 words and the expectation would trivially pass regardless of how bloated the rest of the document is \u2014 which would let exactly the over-length failure observed here slip through undetected. I graded against the whole-document word count (supported by facts.json precomputing outputs.answer.md.words for the full file, which only makes sense as a whole-document check), but recommend the eval wording be tightened to something like 'answer.md as a whole is <=400 words and includes a concrete recommendation...' to remove the ambiguity for future graders."
+      },
+      {
+        "reason": "None of the three expectations check proportionality of effort on the direct-analysis path itself (tool calls / tokens spent), only that zero agents were spawned. This run spent 2 ctx7 library-doc round trips and ~44k tokens (timing.json) investigating Prettier/Biome defaults for a question the skill itself judged too trivial for a council. That grounding is arguably good practice (and matches the user's own global ctx7-usage rule), so it is not flagged as a failure here, but a future eval iteration could add a lightweight proportionality bound (e.g., total tokens or tool calls below some multiple of a 'trivial' baseline) to catch cases where the gate correctly blocks the council but the fallback path still balloons in cost."
+      },
+      {
+        "reason": "No expectation checks that factual claims backing the recommendation (Prettier/Biome formatter defaults) are actually grounded in a tool result rather than asserted from the model's own memory. In this run the Prettier claim was directly traceable to a ctx7 doc fetch, but the Biome 'indentStyle: tab' claim could not be confirmed from the visible transcript (see claims section) \u2014 a hallucinated-but-plausible default would currently pass all three expectations undetected since none of them inspect the evidentiary basis of the recommendation's factual content."
+      }
+    ],
+    "overall": "The three expectations are reasonably discriminating as written \u2014 expectation 1 and 2 have strong, unambiguous support in both the transcript and facts.json, and expectation 3's word cap correctly catches a real defect (the 'no council overhead' framing is not backed by output length: 1390-1393 words against a 400-word budget). The main improvement would be tightening expectation 3's wording to remove scope ambiguity between 'whole file' and 'recommendation snippet,' since a narrow reading would let the observed over-length failure pass by coincidence."
+  }
+}
